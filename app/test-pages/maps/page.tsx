@@ -1,0 +1,605 @@
+"use client";
+
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import mapboxgl from "mapbox-gl";
+import { Compass, Plus, Minus } from "lucide-react";
+
+import "mapbox-gl/dist/mapbox-gl.css";
+import { Input } from "@/components/ui/input";
+import { SearchBox } from "@mapbox/search-js-react";
+
+const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+// Componente de controle de navegação customizado
+interface NavigationControlsProps {
+	mapRef: React.RefObject<mapboxgl.Map | null>;
+}
+
+const NavigationControls: React.FC<NavigationControlsProps> = ({ mapRef }) => {
+	const handleZoomIn = () => {
+		if (mapRef.current) {
+			mapRef.current.zoomTo(mapRef.current.getZoom() + 1, {
+				duration: 300,
+			});
+		}
+	};
+
+	const handleZoomOut = () => {
+		if (mapRef.current) {
+			mapRef.current.zoomTo(mapRef.current.getZoom() - 1, {
+				duration: 300,
+			});
+		}
+	};
+
+	const handleResetNorth = () => {
+		if (mapRef.current) {
+			mapRef.current.easeTo({ bearing: 0, pitch: 0, duration: 1000 });
+		}
+	};
+
+	return (
+		<div className="flex flex-col gap-2 pointer-events-auto">
+			<button
+				onClick={handleZoomIn}
+				className="bg-white hover:bg-gray-100 cursor-pointer rounded-lg p-2 shadow-md transition-colors"
+				title="Zoom in"
+			>
+				<Plus size={20} className="text-gray-700" />
+			</button>
+			<button
+				onClick={handleZoomOut}
+				className="bg-white hover:bg-gray-100 cursor-pointer rounded-lg p-2 shadow-md transition-colors"
+				title="Zoom out"
+			>
+				<Minus size={20} className="text-gray-700" />
+			</button>
+			<button
+				onClick={handleResetNorth}
+				className="bg-white hover:bg-gray-100 cursor-pointer rounded-lg p-2 shadow-md transition-colors"
+				title="Reset north"
+			>
+				<Compass size={20} className="text-gray-700" />
+			</button>
+		</div>
+	);
+};
+
+const generateRandomEvents = (userLat: number, userLng: number) => {
+	const randomOffset = () =>
+		(Math.random() * 0.0009 + 0.0001) * (Math.random() > 0.5 ? 1 : -1);
+
+	return [
+		{
+			id: 1,
+			title: "Denúncia 1",
+			address: "Endereço da denuncia 1",
+			description: "Descrição da denuncia 1",
+			location: {
+				latitude: userLat + randomOffset(),
+				longitude: userLng + randomOffset(),
+			},
+			risco: "alto",
+			votos: 5,
+		},
+		{
+			id: 2,
+			title: "Denúncia 2",
+			address: "Endereço da denuncia 2",
+			description: "Descrição da denuncia 2",
+			location: {
+				latitude: userLat + randomOffset(),
+				longitude: userLng + randomOffset(),
+			},
+			risco: "medio",
+			votos: 3,
+		},
+		{
+			id: 3,
+			title: "Denúncia 3",
+			address: "Endereço da denuncia 3",
+			description: "Descrição da denuncia 3",
+			location: {
+				latitude: userLat + randomOffset(),
+				longitude: userLng + randomOffset(),
+			},
+			risco: "baixo",
+			votos: 8,
+		},
+	];
+};
+
+const Page = () => {
+	const mapContainerRef = useRef<HTMLDivElement>(null);
+	const mapRef = useRef<mapboxgl.Map | null>(null);
+	const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+	const eventMarkersRef = useRef<mapboxgl.Marker[]>([]);
+	const mapInitializedRef = useRef(false);
+	const userLocationUsedRef = useRef(false);
+	const activeMarkerRef = useRef<{
+		marker: mapboxgl.Marker;
+		event: (typeof dynamicEvents)[0];
+		element: HTMLElement;
+	} | null>(null);
+
+	const [userLocation, setUserLocation] = useState<{
+		latitude: number;
+		longitude: number;
+	} | null>(null);
+	const [dynamicEvents, setDynamicEvents] = useState(
+		generateRandomEvents(0, 0)
+	);
+	const [activeEvent, setActiveEvent] = useState<
+		(typeof dynamicEvents)[0] | null
+	>(null);
+	const [termoBusca, setTermoBusca] = useState("");
+
+	function toFourDecimalPlaces(num: number) {
+		return parseFloat(num.toFixed(4));
+	}
+
+	// Função para desativar o marker ativo
+	const deactivateMarker = () => {
+		if (activeMarkerRef.current) {
+			const { element } = activeMarkerRef.current;
+			element.classList.remove("marker-active");
+			// Remover escala de cinza dos outros markers
+			eventMarkersRef.current.forEach((marker) => {
+				const el = marker.getElement();
+				el.classList.remove("marker-grayscale");
+			});
+			activeMarkerRef.current = null;
+			setActiveEvent(null);
+		}
+	};
+
+	// Função para ativar o marker
+	const activateMarker = useCallback(
+		(marker: mapboxgl.Marker, event: (typeof dynamicEvents)[0]) => {
+			// Desativar o marker anterior se existir
+			deactivateMarker();
+
+			const element = marker.getElement();
+
+			// Adicionar classe ativa ao marker clicado
+			element.classList.add("marker-active");
+
+			// Adicionar escala de cinza aos outros markers
+			eventMarkersRef.current.forEach((m) => {
+				if (m !== marker) {
+					const el = m.getElement();
+					el.classList.add("marker-grayscale");
+				}
+			});
+
+			// Log do evento
+			console.log("✅ Marker ativado:");
+			console.log({
+				id: event.id,
+				title: event.title,
+				description: event.description,
+				location: event.location,
+				risco: event.risco,
+				votos: event.votos,
+			});
+
+			activeMarkerRef.current = { marker, event, element };
+			setActiveEvent(event);
+		},
+		[]
+	);
+
+	// Determinar cor baseada no risco
+	const colorMap: Record<string, string> = {
+		alto: "#ef4444",
+		medio: "#f97316",
+		baixo: "#60a5fa",
+	};
+
+	// Função para criar marker com animação de fade-in usando Tailwind
+	const createAnimatedMarker = useCallback(
+		(
+			lat: number,
+			lng: number,
+			risco: string,
+			event: (typeof dynamicEvents)[0]
+		) => {
+			const markerEl = document.createElement("div");
+			const markerOuter = document.createElement("div");
+			const markerInner = document.createElement("div");
+			const markerTriangle = document.createElement("div");
+
+			const bgColor = colorMap[risco] || "#9ca3af";
+			const bgColorClass =
+				{
+					"#ef4444": "bg-red-500",
+					"#f97316": "bg-orange-500",
+					"#60a5fa": "bg-blue-400",
+				}[bgColor] || "bg-gray-400";
+
+			// Marker exterior (com cor de fundo, cria o anel colorido)
+			markerOuter.className = `w-14 h-14 rounded-full shadow-lg marker-animate flex items-center justify-center ${bgColorClass}`;
+			markerOuter.style.position = "relative";
+			markerOuter.style.padding = "5px";
+
+			// Marker interior (branco, o círculo central)
+			markerInner.className = "w-full h-full rounded-full bg-white z-1";
+
+			// Criar triângulo apontador
+			markerTriangle.style.width = "0";
+			markerTriangle.style.height = "0";
+			markerTriangle.style.borderLeft = "14px solid transparent";
+			markerTriangle.style.borderRight = "14px solid transparent";
+			markerTriangle.style.borderTop = `14px solid ${bgColor}`;
+			markerTriangle.style.position = "absolute";
+			markerTriangle.style.bottom = "-10px";
+			markerTriangle.style.left = "50%";
+			markerTriangle.style.transform = "translateX(-50%)";
+
+			markerEl.appendChild(markerOuter);
+			markerOuter.appendChild(markerInner);
+			markerOuter.appendChild(markerTriangle);
+			markerEl.style.cursor = "pointer";
+
+			// Adicionar o marker ao mapa
+			const marker = new mapboxgl.Marker(markerEl)
+				.setLngLat([lng, lat])
+				.addTo(mapRef.current!);
+
+			// Adicionar evento de clique ao marker
+			markerEl.addEventListener("click", (e) => {
+				e.stopPropagation();
+				activateMarker(marker, event);
+			});
+
+			return marker;
+		},
+		[activateMarker]
+	);
+
+	// Efeito 1: Coletar geolocalização do navegador
+	useEffect(() => {
+		if (navigator.geolocation) {
+			const watchId = navigator.geolocation.watchPosition(
+				(position) => {
+					const { latitude, longitude, accuracy } = position.coords;
+					setUserLocation({ latitude, longitude });
+					console.log("✅ Localização atualizada:");
+					console.log({
+						latitude: toFourDecimalPlaces(latitude),
+						longitude: toFourDecimalPlaces(longitude),
+						accuracy: `${Math.round(accuracy)} metros`,
+					});
+				},
+				(error) => {
+					console.error(
+						"❌ Erro ao obter localização:",
+						error.message
+					);
+				},
+				{
+					enableHighAccuracy: true,
+					timeout: 30000,
+					maximumAge: 0,
+				}
+			);
+
+			return () => navigator.geolocation.clearWatch(watchId);
+		}
+	}, []);
+
+	// Efeito 2: Inicializar o mapa (apenas uma vez)
+	useEffect(() => {
+		mapboxgl.accessToken = accessToken;
+
+		mapRef.current = new mapboxgl.Map({
+			container: "map",
+			style: "mapbox://styles/joaoalan15/cmi89010b004301qm4yrz293a",
+			center: [0, 0],
+			zoom: 18,
+			boxZoom: false,
+			language: "pt-BR",
+			locale: {
+				"ScrollZoomBlocker.CtrlMessage": "Use Ctrl + scroll para zoom",
+			},
+			config: {
+				basemap: {
+					show3dObjects: false,
+				},
+			},
+		});
+
+		const marker = new mapboxgl.Marker({
+			draggable: true,
+		})
+			.setLngLat([0, 0])
+			.addTo(mapRef.current);
+
+		userMarkerRef.current = marker;
+
+		function onDragEnd() {
+			const lngLat = marker.getLngLat();
+			console.log("📍 Marcador movido para:");
+			console.log({
+				latitude: toFourDecimalPlaces(lngLat.lat),
+				longitude: toFourDecimalPlaces(lngLat.lng),
+			});
+		}
+
+		marker.on("dragend", onDragEnd);
+		mapInitializedRef.current = true;
+
+		return () => mapRef.current?.remove();
+	}, []);
+
+	// Efeito 2.5: Criar markers dos eventos quando o mapa e eventos estiverem prontos
+	useEffect(() => {
+		if (!mapRef.current || !mapInitializedRef.current) return;
+
+		// Esperar o mapa estar pronto
+		const createMarkers = () => {
+			// Limpar markers anteriores se existirem
+			eventMarkersRef.current.forEach((marker) => marker.remove());
+			eventMarkersRef.current = [];
+
+			// Criar markers com delay escalonado para efeito visual
+			dynamicEvents.forEach((event, index) => {
+				setTimeout(() => {
+					const marker = createAnimatedMarker(
+						event.location.latitude,
+						event.location.longitude,
+						event.risco,
+						event
+					);
+					eventMarkersRef.current.push(marker);
+				}, index * 100);
+			});
+		};
+
+		if (mapRef.current.isStyleLoaded()) {
+			createMarkers();
+		} else {
+			mapRef.current.on("load", createMarkers);
+		}
+
+		return () => {
+			if (mapRef.current) {
+				mapRef.current.off("load", createMarkers);
+			}
+		};
+	}, [dynamicEvents, createAnimatedMarker]);
+
+	// Efeito 3: Usar localização do usuário para inicializar eventos e mapa
+	useEffect(() => {
+		// Se o mapa já foi inicializado com localização, não fazer nada mais
+		if (userLocationUsedRef.current) {
+			return;
+		}
+
+		// Se mapa está pronto e temos localização do usuário
+		if (mapInitializedRef.current && mapRef.current && userLocation) {
+			const userCenter: [number, number] = [
+				userLocation.longitude,
+				userLocation.latitude,
+			];
+
+			// Gerar eventos dinâmicos com base na localização do usuário
+			const newEvents = generateRandomEvents(
+				userLocation.latitude,
+				userLocation.longitude
+			);
+
+			// Mover mapa para a localização do usuário na primeira vez
+			mapRef.current.flyTo({
+				center: userCenter,
+				zoom: 18,
+				duration: 1000,
+			});
+
+			// Atualizar posição do marcador
+			userMarkerRef.current?.setLngLat(userCenter);
+
+			// Marcar que já usamos a localização do usuário
+			userLocationUsedRef.current = true;
+
+			// Queue state update asynchronously to avoid cascading renders
+			queueMicrotask(() => {
+				setDynamicEvents(newEvents);
+			});
+
+			console.log("🎯 Mapa centralizado na localização do usuário");
+		}
+	}, [userLocation]);
+
+	return (
+		<div className="flex w-full h-screen justify-center items-center">
+			{/* Clique no mapa para desativar o marker */}
+			<div
+				id="map"
+				ref={mapContainerRef}
+				style={{ height: "100%", width: "100%" }}
+				className="bg-[#65cafe] w-full h-full"
+				onClick={() => deactivateMarker()}
+			></div>
+
+			{/* Painel de Detalhes do Marker - Anima da direita para esquerda */}
+			<div
+				className={`fixed right-0 top-0 bottom-0 w-96 z-20! pointer-events-none transition-all duration-300 ${
+					activeEvent
+						? "translate-x-0 opacity-100 pointer-events-auto"
+						: "translate-x-40 opacity-0"
+				}`}
+			>
+				<div className="h-full p-8 px-10 flex flex-col justify-center">
+					<div
+						className={`bg-background/80 h-full rounded-xl border backdrop-blur-md shadow-lg p-4 w-full ${
+							activeEvent
+								? "pointer-events-auto"
+								: "pointer-events-none"
+						}`}
+					>
+						{activeEvent && (
+							<>
+								<h2 className="text-lg font-bold mb-3">
+									{activeEvent.title}
+								</h2>
+								<p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+									{activeEvent.description}
+								</p>
+								<div className="space-y-2 text-sm">
+									<p>
+										<span className="font-semibold">
+											Risco:
+										</span>{" "}
+										<span className="capitalize">
+											{activeEvent.risco}
+										</span>
+									</p>
+									<p>
+										<span className="font-semibold">
+											Votos:
+										</span>{" "}
+										{activeEvent.votos}
+									</p>
+									<p>
+										<span className="font-semibold">
+											Latitude:
+										</span>{" "}
+										{toFourDecimalPlaces(
+											activeEvent.location.latitude
+										)}
+									</p>
+									<p>
+										<span className="font-semibold">
+											Longitude:
+										</span>{" "}
+										{toFourDecimalPlaces(
+											activeEvent.location.longitude
+										)}
+									</p>
+								</div>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+
+			{/* Painel de Informações - Move para esquerda quando details está ativo */}
+			<div
+				className={`fixed right-0 top-0 bottom-0 z-10 transition-all pointer-events-none duration-300 w-2/9 ${
+					activeEvent ? "right-18" : ""
+				}`}
+			>
+				<div className="padding-4 h-full p-8 flex justify-between">
+					{/* Controles de Navegação */}
+					<div className="pointer-events-none flex items-end p-4 relative">
+						<div className="absolute w-96 right-4 top-0 pointer-events-auto">
+							{/* <Input className="h-12 bg-white/80 backdrop-blur-md shadow-sm rounded-xl text-lg!" placeholder="Buscar endereço..." /> */}
+							<SearchBox
+								accessToken={accessToken!}
+								options={{
+									language: "pt-BR",
+									country: "BR",
+								}}
+								map={mapRef.current!}
+								mapboxgl={mapboxgl}
+								value={termoBusca}
+								onChange={(d) => {
+									setTermoBusca(d);
+								}}
+								marker
+							/>
+						</div>
+						<NavigationControls mapRef={mapRef} />
+					</div>
+
+					{/* Painel de Informações */}
+					<div
+						className={`bg-background/60 rounded-xl border backdrop-blur-md shadow p-4 w-full  ${
+							activeEvent
+								? "pointer-events-none"
+								: "pointer-events-auto"
+						}`}
+					>
+						<div
+							className={`absolute w-full h-full top-0 left-0 rounded-xl bg-gray-100 transition-all ${
+								activeEvent
+									? "opacity-80 backdrop-blur-2xl"
+									: "opacity-0 pointer-events-none"
+							}`}
+						></div>
+						<h2 className="text-lg font-bold mb-3 text-gray-800">
+							Perto de você
+						</h2>
+						<div className="space-y-2">
+							{dynamicEvents?.map((event: any) => (
+								<div
+									key={event.id}
+									className="rounded-sm bg-card hover:bg-white shadow p-2 flex gap-2 border hover:shadow-lg transition-all cursor-pointer"
+									onClick={() => {
+										const marker =
+											eventMarkersRef.current.find(
+												(m) => {
+													const markerEvent =
+														dynamicEvents.find(
+															(e) =>
+																e.id ===
+																event.id
+														);
+													return (
+														m
+															.getLngLat()
+															.lng.toFixed(4) ===
+															markerEvent?.location.longitude.toFixed(
+																4
+															) &&
+														m
+															.getLngLat()
+															.lat.toFixed(4) ===
+															markerEvent?.location.latitude.toFixed(
+																4
+															)
+													);
+												}
+											);
+										if (marker) {
+											activateMarker(marker, event);
+										}
+									}}
+								>
+									<div
+										style={{
+											backgroundColor:
+												colorMap[event.risco],
+										}}
+										className={`p-0.5 bg-[${
+											colorMap[event.risco]
+										}] rounded-full`}
+									></div>
+									<div className="flex flex-col gap-1 flex-1 py-2">
+										<h3 className="font-semibold p-0 m-0 leading-2">
+											{event.title}{" "}
+											{colorMap[event.risco]}
+										</h3>
+										<p className="text-sm text-gray-400 dark:text-gray-400">
+											{event.address}
+											{/*<span className="capitalize">
+												{event.risco}
+											</span>*/}
+										</p>
+									</div>
+
+									<div className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center px-3 py-1 rounded-full">
+										{event.votos}
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default Page;

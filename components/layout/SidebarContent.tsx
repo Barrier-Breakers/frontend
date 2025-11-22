@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, X } from "lucide-react";
-import { navItems } from "./NavItems";
+import { navItems, type NavItem } from "./NavItems";
 import { IconRenderer } from "./IconRenderer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -63,7 +63,7 @@ export function SidebarContent({
 
 			{/* Sidebar Content */}
 			<nav className="flex-1 flex flex-col gap-2 p-2 pr-3">
-				{navItems.map((item) => {
+				{navItems.map((item: NavItem) => {
 					const active = isActive(item.href);
 					const isHovering = hoveredItemId === item.id;
 					return (

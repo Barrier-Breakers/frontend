@@ -1,8 +1,6 @@
-import newsPaperAnimation from "@/lotties/Newspaper.json";
-import searchAnimation from "@/lotties/Search.json";
-import mapAnimation from "@/lotties/Map.json";
-import calendarAnimation from "@/lotties/Calendar.json";
-import learnAnimation from "@/lotties/Learn.json";
+"use client";
+
+import { animations } from "./animations";
 
 export interface NavItem {
 	id: string;
@@ -19,7 +17,7 @@ export const navItems: NavItem[] = [
 	{
 		id: "noticias",
 		label: "Notícias",
-		lottieAnimation: newsPaperAnimation,
+		lottieAnimation: animations.newspaper,
 		animateOnHover: true,
 		href: "/noticias",
 		activeVariant: "limanjar",
@@ -27,7 +25,7 @@ export const navItems: NavItem[] = [
 	{
 		id: "pesquisa",
 		label: "Pesquisa",
-		lottieAnimation: searchAnimation,
+		lottieAnimation: animations.search,
 		animateOnHover: true,
 		href: "/pesquisa",
 		activeVariant: "limanjar",
@@ -35,7 +33,7 @@ export const navItems: NavItem[] = [
 	{
 		id: "mapa-de-denuncias",
 		label: "Mapa de denúncias",
-		lottieAnimation: mapAnimation,
+		lottieAnimation: animations.map,
 		animateOnHover: true,
 		animationClassName: "h-10! -translate-y-[2px] scale-95!",
 		href: "/mapa-de-denuncias",
@@ -44,7 +42,7 @@ export const navItems: NavItem[] = [
 	{
 		id: "calendario-legislativo",
 		label: "Calendário Legislativo",
-		lottieAnimation: calendarAnimation,
+		lottieAnimation: animations.calendar,
 		animateOnHover: true,
 		href: "/calendario-legislativo",
 		activeVariant: "limanjar",
@@ -52,7 +50,7 @@ export const navItems: NavItem[] = [
 	{
 		id: "educacao",
 		label: "Educação",
-		lottieAnimation: learnAnimation,
+		lottieAnimation: animations.learn,
 		animateOnHover: true,
 		href: "/educacao",
 		activeVariant: "limanjar",

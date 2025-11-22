@@ -24,6 +24,7 @@ export function SidebarContent({
 	const { isActive } = useActiveRoute();
 	const router = useRouter();
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
 	const handleLogout = async () => {
 		try {
@@ -64,12 +65,15 @@ export function SidebarContent({
 			<nav className="flex-1 flex flex-col gap-2 p-2 pr-3">
 				{navItems.map((item) => {
 					const active = isActive(item.href);
+					const isHovering = hoveredItemId === item.id;
 					return (
 						<Link
 							key={item.id}
 							href={item.href}
 							onClick={isMobile ? onCloseMobile : undefined}
 							className="no-underline!"
+							onMouseEnter={() => setHoveredItemId(item.id)}
+							onMouseLeave={() => setHoveredItemId(null)}
 						>
 							<Button
 								variant={active ? (item.activeVariant as any) : "nevasca"}
@@ -77,7 +81,13 @@ export function SidebarContent({
 								className="h-14 cursor-pointer w-full flex justify-start gap-4 p-4"
 							>
 								<div className="flex-shrink-0 flex items-center justify-center w-5">
-									<IconRenderer iconName={item.iconName} />
+									<IconRenderer
+										iconName={item.iconName || ""}
+										lottieAnimation={item.lottieAnimation}
+										animateOnHover={item.animateOnHover}
+										animationClassName={item.animationClassName}
+										isHovering={isHovering}
+									/>
 								</div>
 								{(isExpanded || isMobile) && (
 									<span className="text-[1.08rem] font-semibold whitespace-nowrap overflow-hidden">

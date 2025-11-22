@@ -1,44 +1,59 @@
+import newsPaperAnimation from "@/lotties/Newspaper.json";
+import searchAnimation from "@/lotties/Search.json";
+import mapAnimation from "@/lotties/Map.json";
+import calendarAnimation from "@/lotties/Calendar.json";
+import learnAnimation from "@/lotties/Learn.json";
+
 export interface NavItem {
 	id: string;
 	label: string;
-	iconName: string;
+	iconName?: string;
 	href: string;
 	activeVariant: string;
+	lottieAnimation?: object;
+	animateOnHover?: boolean;
+	animationClassName?: string;
 }
 
 export const navItems: NavItem[] = [
 	{
 		id: "noticias",
 		label: "Notícias",
-		iconName: "Newspaper",
+		lottieAnimation: newsPaperAnimation,
+		animateOnHover: true,
 		href: "/noticias",
 		activeVariant: "limanjar",
 	},
 	{
 		id: "pesquisa",
 		label: "Pesquisa",
-		iconName: "Search",
+		lottieAnimation: searchAnimation,
+		animateOnHover: true,
 		href: "/pesquisa",
 		activeVariant: "limanjar",
 	},
 	{
 		id: "mapa-de-denuncias",
 		label: "Mapa de denúncias",
-		iconName: "Map",
+		lottieAnimation: mapAnimation,
+		animateOnHover: true,
+		animationClassName: "h-10! -translate-y-[2px] scale-95!",
 		href: "/mapa-de-denuncias",
 		activeVariant: "limanjar",
 	},
 	{
 		id: "calendario-legislativo",
 		label: "Calendário Legislativo",
-		iconName: "Calendar",
+		lottieAnimation: calendarAnimation,
+		animateOnHover: true,
 		href: "/calendario-legislativo",
 		activeVariant: "limanjar",
 	},
 	{
 		id: "educacao",
 		label: "Educação",
-		iconName: "GraduationCap",
+		lottieAnimation: learnAnimation,
+		animateOnHover: true,
 		href: "/educacao",
 		activeVariant: "limanjar",
 	},

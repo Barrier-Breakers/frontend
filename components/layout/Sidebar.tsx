@@ -1,3 +1,5 @@
+"use client";
+
 import { SidebarContent } from "./SidebarContent";
 
 interface SidebarProps {

@@ -6,8 +6,7 @@
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
+	--font-sans: var(--font-montserrat);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -185,4 +184,239 @@
 .marker-active {
 	filter: none;
 	transform: scale(1.15);
+}
+
+button {
+	transition: 0.2s all;
+	border-radius: 10px !important;
+}
+
+button:hover {
+	transform: translate(-2px, -2px);
+}
+
+button:active {
+	transform: translate(-1px, -1px);
+}
+
+button:focus-visible {
+	outline: none;
+	transform: translate(-2px, -2px);
+}
+
+button:focus-visible:active {
+	box-shadow: 3px 3px 0 0px black;
+	transform: translate(-1px, -1px);
+}
+
+/* Focus ring colors for each button variant - inner white, outer colored */
+button[class*="bg-white"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px black !important;
+}
+
+button[class*="bg-\[#abfa00\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #abfa00 !important;
+}
+
+button[class*="bg-\[#e8752e\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #e8752e !important;
+}
+
+button[class*="bg-\[#e594af\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #e594af !important;
+}
+
+button[class*="bg-\[#478e4e\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #478e4e !important;
+}
+
+button[class*="bg-\[#f9df59\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #f9df59 !important;
+}
+
+button[class*="bg-\[#444b88\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #444b88 !important;
+}
+
+button[class*="bg-\[#da3263\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #da3263 !important;
+}
+
+button[class*="bg-\[#b9d3c2\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #b9d3c2 !important;
+}
+
+button[class*="bg-\[#0499a2\]"]:focus-visible {
+	box-shadow:
+		4px 4px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #0499a2 !important;
+}
+
+/* Focus-visible:active states for each button variant */
+button[class*="bg-white"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px black !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#abfa00\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #abfa00 !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#e8752e\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #e8752e !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#e594af\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #e594af !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#478e4e\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #478e4e !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#f9df59\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #f9df59 !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#444b88\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #444b88 !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#da3263\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #da3263 !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#b9d3c2\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #b9d3c2 !important;
+	transform: translate(-1px, -1px);
+}
+
+button[class*="bg-\[#0499a2\]"]:focus-visible:active {
+	box-shadow:
+		3px 3px 0 0px black,
+		0 0 0 4px white,
+		0 0 0 8px #0499a2 !important;
+	transform: translate(-1px, -1px);
+}
+
+@layer components {
+}
+
+.sombroso {
+	box-shadow: 2px 2px 0 0 black;
+}
+
+.cardoso {
+	border: 2px solid;
+	box-shadow: 2px 2px 0 0 black;
+}
+
+.nevasca {
+	@apply bg-white text-black;
+}
+
+.limanjar {
+	@apply bg-[#abfa00] text-black;
+}
+
+.mexerica {
+	@apply bg-[#e8752e] text-black;
+}
+
+.chicletim {
+	@apply bg-[#e594af] text-black;
+}
+
+.folheto {
+	@apply bg-[#478e4e] text-white;
+}
+
+.bananova {
+	@apply bg-[#f9df59] text-black;
+}
+
+.jabutina {
+	@apply bg-[#444b88] text-white;
+}
+
+.frambos {
+	@apply bg-[#da3263] text-white;
+}
+
+.abacatino {
+	@apply bg-[#b9d3c2] text-black;
+}
+
+.piscina {
+	@apply bg-[#0499a2] text-white;
+}
+
+a {
+	@apply underline decoration-1 font-bold text-black;
+}
+
+.main-content-border {
+	@apply md:shadow-[calc(-3px)_0px_0px_0px_black,_0px_calc(-3px)_0px_0px_black,_0px_3px_0px_0px_black];
 }

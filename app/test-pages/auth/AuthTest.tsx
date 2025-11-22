@@ -32,7 +32,7 @@ const AuthTest = () => {
 				localStorage.setItem("refresh_token", data.session.refresh_token || "");
 				localStorage.setItem(
 					"token_expires_at",
-					String(Date.now() + (data.session.expires_in || 3600) * 1000),
+					String(Date.now() + (data.session.expires_in || 3600) * 1000)
 				);
 				alert("Sign up successful");
 			} else {
@@ -63,7 +63,7 @@ const AuthTest = () => {
 				localStorage.setItem("refresh_token", data.session.refresh_token || "");
 				localStorage.setItem(
 					"token_expires_at",
-					String(Date.now() + (data.expires_in || 3600) * 1000),
+					String(Date.now() + (data.expires_in || 3600) * 1000)
 				);
 				alert("Sign in successful");
 			} else {
@@ -266,11 +266,7 @@ const AuthTest = () => {
 					<CardTitle>Logout</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<Button
-						onClick={handleLogout}
-						disabled={loading}
-						variant="destructive"
-					>
+					<Button onClick={handleLogout} disabled={loading} variant="destructive">
 						Logout
 					</Button>
 				</CardContent>

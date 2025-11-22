@@ -19,15 +19,12 @@ const AuthCallback = () => {
 			// Armazena os tokens
 			localStorage.setItem("access_token", accessToken);
 			localStorage.setItem("refresh_token", refreshToken || "");
-			localStorage.setItem(
-				"token_expires_at",
-				String(Date.now() + Number(expiresIn) * 1000),
-			);
+			localStorage.setItem("token_expires_at", String(Date.now() + Number(expiresIn) * 1000));
 
-			// Redireciona para o dashboard
-			router.push("/test-pages/dashboard");
+			// Redireciona para o noticias
+			router.push("/noticias");
 		} else {
-			router.push("/test-pages/auth");
+			router.push("/login");
 		}
 	}, [router]);
 

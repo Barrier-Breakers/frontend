@@ -44,6 +44,12 @@
 
 :root {
 	--radius: 0.625rem;
+	--brand-yellow: #fde047;
+	--brand-pink: #f9a8d4;
+	--brand-blue: #93c5fd;
+	--brand-green: #a7f3d0;
+	--background-light: #f8f7f4;
+	--background-dark: #121212;
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(1 0 0);
@@ -419,4 +425,21 @@ a {
 
 .main-content-border {
 	@apply md:shadow-[calc(-3px)_0px_0px_0px_black,_0px_calc(-3px)_0px_0px_black,_0px_3px_0px_0px_black];
+}
+
+.hard-shadow {
+	box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+}
+.hard-shadow-sm {
+	box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+}
+.border-black-custom {
+	border: 3px solid #000;
+}
+.material-symbols-outlined {
+	font-variation-settings:
+		"FILL" 0,
+		"wght" 600,
+		"GRAD" 0,
+		"opsz" 48;
 }

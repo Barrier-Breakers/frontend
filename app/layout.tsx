@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
+import BackgroundDecorations from "../components/BackgroundDecorations";
 
-const montserrat = Montserrat({
+const poppins = Poppins({
 	subsets: ["latin"],
-	weight: ["400", "500", "600", "700"],
-	variable: "--font-montserrat",
+	weight: ["400", "500", "600", "700", "800"],
+	variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -28,8 +29,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="pt-BR">
-			<body className={`${montserrat.className} antialiased h-screen bg-[#fceee3]`}>
+		<html lang="pt-BR" className="scroll-smooth">
+			<body
+				className={`${poppins.className} bg-[#f9f5f2] font-display text-gray-900 dark:text-gray-100 overflow-x-hidden`}
+			>
+				<BackgroundDecorations />
 				{children}
 			</body>
 		</html>

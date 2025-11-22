@@ -66,8 +66,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({ mapRef }) => {
 };
 
 const generateRandomEvents = (userLat: number, userLng: number) => {
-	const randomOffset = () =>
-		(Math.random() * 0.0009 + 0.0001) * (Math.random() > 0.5 ? 1 : -1);
+	const randomOffset = () => (Math.random() * 0.0009 + 0.0001) * (Math.random() > 0.5 ? 1 : -1);
 
 	return [
 		{
@@ -126,12 +125,8 @@ const Page = () => {
 		latitude: number;
 		longitude: number;
 	} | null>(null);
-	const [dynamicEvents, setDynamicEvents] = useState(
-		generateRandomEvents(0, 0)
-	);
-	const [activeEvent, setActiveEvent] = useState<
-		(typeof dynamicEvents)[0] | null
-	>(null);
+	const [dynamicEvents, setDynamicEvents] = useState(generateRandomEvents(0, 0));
+	const [activeEvent, setActiveEvent] = useState<(typeof dynamicEvents)[0] | null>(null);
 	const [termoBusca, setTermoBusca] = useState("");
 
 	function toFourDecimalPlaces(num: number) {
@@ -198,12 +193,7 @@ const Page = () => {
 
 	// Função para criar marker com animação de fade-in usando Tailwind
 	const createAnimatedMarker = useCallback(
-		(
-			lat: number,
-			lng: number,
-			risco: string,
-			event: (typeof dynamicEvents)[0]
-		) => {
+		(lat: number, lng: number, risco: string, event: (typeof dynamicEvents)[0]) => {
 			const markerEl = document.createElement("div");
 			const markerOuter = document.createElement("div");
 			const markerInner = document.createElement("div");
@@ -272,10 +262,7 @@ const Page = () => {
 					});
 				},
 				(error) => {
-					console.error(
-						"❌ Erro ao obter localização:",
-						error.message
-					);
+					console.error("❌ Erro ao obter localização:", error.message);
 				},
 				{
 					enableHighAccuracy: true,
@@ -378,16 +365,10 @@ const Page = () => {
 
 		// Se mapa está pronto e temos localização do usuário
 		if (mapInitializedRef.current && mapRef.current && userLocation) {
-			const userCenter: [number, number] = [
-				userLocation.longitude,
-				userLocation.latitude,
-			];
+			const userCenter: [number, number] = [userLocation.longitude, userLocation.latitude];
 
 			// Gerar eventos dinâmicos com base na localização do usuário
-			const newEvents = generateRandomEvents(
-				userLocation.latitude,
-				userLocation.longitude
-			);
+			const newEvents = generateRandomEvents(userLocation.latitude, userLocation.longitude);
 
 			// Mover mapa para a localização do usuário na primeira vez
 			mapRef.current.flyTo({
@@ -433,49 +414,31 @@ const Page = () => {
 				<div className="h-full p-8 px-10 flex flex-col justify-center">
 					<div
 						className={`bg-background/80 h-full rounded-xl border backdrop-blur-md shadow-lg p-4 w-full ${
-							activeEvent
-								? "pointer-events-auto"
-								: "pointer-events-none"
+							activeEvent ? "pointer-events-auto" : "pointer-events-none"
 						}`}
 					>
 						{activeEvent && (
 							<>
-								<h2 className="text-lg font-bold mb-3">
-									{activeEvent.title}
-								</h2>
+								<h2 className="text-lg font-bold mb-3">{activeEvent.title}</h2>
 								<p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
 									{activeEvent.description}
 								</p>
 								<div className="space-y-2 text-sm">
 									<p>
-										<span className="font-semibold">
-											Risco:
-										</span>{" "}
-										<span className="capitalize">
-											{activeEvent.risco}
-										</span>
+										<span className="font-semibold">Risco:</span>{" "}
+										<span className="capitalize">{activeEvent.risco}</span>
 									</p>
 									<p>
-										<span className="font-semibold">
-											Votos:
-										</span>{" "}
+										<span className="font-semibold">Votos:</span>{" "}
 										{activeEvent.votos}
 									</p>
 									<p>
-										<span className="font-semibold">
-											Latitude:
-										</span>{" "}
-										{toFourDecimalPlaces(
-											activeEvent.location.latitude
-										)}
+										<span className="font-semibold">Latitude:</span>{" "}
+										{toFourDecimalPlaces(activeEvent.location.latitude)}
 									</p>
 									<p>
-										<span className="font-semibold">
-											Longitude:
-										</span>{" "}
-										{toFourDecimalPlaces(
-											activeEvent.location.longitude
-										)}
+										<span className="font-semibold">Longitude:</span>{" "}
+										{toFourDecimalPlaces(activeEvent.location.longitude)}
 									</p>
 								</div>
 							</>
@@ -516,9 +479,7 @@ const Page = () => {
 					{/* Painel de Informações */}
 					<div
 						className={`bg-background/60 rounded-xl border backdrop-blur-md shadow p-4 w-full  ${
-							activeEvent
-								? "pointer-events-none"
-								: "pointer-events-auto"
+							activeEvent ? "pointer-events-none" : "pointer-events-auto"
 						}`}
 					>
 						<div
@@ -528,40 +489,24 @@ const Page = () => {
 									: "opacity-0 pointer-events-none"
 							}`}
 						></div>
-						<h2 className="text-lg font-bold mb-3 text-gray-800">
-							Perto de você
-						</h2>
+						<h2 className="text-lg font-bold mb-3 text-gray-800">Perto de você</h2>
 						<div className="space-y-2">
 							{dynamicEvents?.map((event: any) => (
 								<div
 									key={event.id}
 									className="rounded-sm bg-card hover:bg-white shadow p-2 flex gap-2 border hover:shadow-lg transition-all cursor-pointer"
 									onClick={() => {
-										const marker =
-											eventMarkersRef.current.find(
-												(m) => {
-													const markerEvent =
-														dynamicEvents.find(
-															(e) =>
-																e.id ===
-																event.id
-														);
-													return (
-														m
-															.getLngLat()
-															.lng.toFixed(4) ===
-															markerEvent?.location.longitude.toFixed(
-																4
-															) &&
-														m
-															.getLngLat()
-															.lat.toFixed(4) ===
-															markerEvent?.location.latitude.toFixed(
-																4
-															)
-													);
-												}
+										const marker = eventMarkersRef.current.find((m) => {
+											const markerEvent = dynamicEvents.find(
+												(e) => e.id === event.id
 											);
+											return (
+												m.getLngLat().lng.toFixed(4) ===
+													markerEvent?.location.longitude.toFixed(4) &&
+												m.getLngLat().lat.toFixed(4) ===
+													markerEvent?.location.latitude.toFixed(4)
+											);
+										});
 										if (marker) {
 											activateMarker(marker, event);
 										}
@@ -569,8 +514,7 @@ const Page = () => {
 								>
 									<div
 										style={{
-											backgroundColor:
-												colorMap[event.risco],
+											backgroundColor: colorMap[event.risco],
 										}}
 										className={`p-0.5 bg-[${
 											colorMap[event.risco]
@@ -578,8 +522,7 @@ const Page = () => {
 									></div>
 									<div className="flex flex-col gap-1 flex-1 py-2">
 										<h3 className="font-semibold p-0 m-0 leading-2">
-											{event.title}{" "}
-											{colorMap[event.risco]}
+											{event.title} {colorMap[event.risco]}
 										</h3>
 										<p className="text-sm text-gray-400 dark:text-gray-400">
 											{event.address}

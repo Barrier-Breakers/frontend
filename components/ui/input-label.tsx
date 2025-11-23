@@ -15,6 +15,7 @@ const InputFloat = ({
 	value,
 	onChange,
 	autoFocus,
+	onKeyDown,
 }: {
 	label?: string;
 	placeholder?: string;
@@ -24,6 +25,7 @@ const InputFloat = ({
 	required?: boolean;
 	value?: string;
 	onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 	autoFocus?: boolean;
 }) => {
 	const id = useId();
@@ -61,12 +63,14 @@ const InputFloat = ({
 					name={name}
 					value={value}
 					onChange={onChange}
+					onKeyDown={onKeyDown}
 					placeholder={isFocused ? placeholder : " "}
 					required={required}
 					onFocus={() => setIsFocused(true)}
 					onBlur={() => setIsFocused(false)}
 					autoFocus={autoFocus}
 					className="dark:bg-background w-full sombroso nevasca border-2 font-semibold border-black h-12 font-lg"
+					autoComplete="off"
 				/>
 			</div>
 		</>

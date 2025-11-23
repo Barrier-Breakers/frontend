@@ -1,4 +1,12 @@
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const envBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+const baseUrl = envBaseUrl || "http://localhost:4000";
+
+if (!baseUrl.startsWith("http")) {
+	console.warn(
+		"api.service: NEXT_PUBLIC_API_URL does not seem to be a full URL; requests may be sent to the wrong origin:",
+		baseUrl
+	);
+}
 
 export interface ApiRequestOptions extends RequestInit {
 	headers?: Record<string, string>;
@@ -6,7 +14,13 @@ export interface ApiRequestOptions extends RequestInit {
 
 export const apiService = {
 	async request<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
-		const url = `${baseUrl}${endpoint}`;
+		// Ensure endpoint starts with a leading slash to avoid accidental concatenation errors
+		const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+		const url = `${baseUrl}${normalizedEndpoint}`;
+
+		if ((process.env.NODE_ENV || "development") === "development") {
+			console.debug("api.service.request - fetching:", url, options?.method);
+		}
 
 		const response = await fetch(url, {
 			...options,
@@ -17,8 +31,22 @@ export const apiService = {
 		});
 
 		if (!response.ok) {
-			const error = await response.json().catch(() => ({}));
-			throw new Error(error.message || `Erro na requisição: ${response.status}`);
+			// Try to parse response body for a helpful error
+			const text = await response.text().catch(() => "");
+			let parsed: any = {};
+			try {
+				parsed = text ? JSON.parse(text) : {};
+			} catch (e) {
+				parsed = { text };
+			}
+
+			const message =
+				parsed?.message ||
+				parsed?.error ||
+				text ||
+				`Erro na requisição: ${response.status}`;
+			// Include URL in the thrown error for easier debugging of incorrect baseUrl
+			throw new Error(`${message} (${response.status}) - ${url}`);
 		}
 
 		return response.json();

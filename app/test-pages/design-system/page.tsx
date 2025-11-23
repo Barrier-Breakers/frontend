@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import InputFloat from "@/components/ui/input-label";
+import InputFloatSuggest from "@/components/ui/input-float-suggest";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { ArrowRight, StarIcon } from "lucide-react";
@@ -141,6 +142,9 @@ const Page = () => {
 				<InputFloat label="Nome completo" className="max-w-sm" />
 				<InputFloat label="Endereço de e-mail" className="max-w-sm" />
 				<InputFloat label="Senha" type="password" className="max-w-sm" />
+				<div className="w-full max-w-sm">
+					<InputFloatSuggest label="Pesquisar" placeholder="Pesquisar..." />
+				</div>
 			</div>
 		</div>
 	);

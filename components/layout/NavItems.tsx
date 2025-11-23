@@ -23,11 +23,11 @@ export const navItems: NavItem[] = [
 		activeVariant: "limanjar",
 	},
 	{
-		id: "pesquisa",
-		label: "Pesquisa",
+		id: "pesquisa-legislativa",
+		label: "Pesquisa Legislativa",
 		lottieAnimation: animations.search,
 		animateOnHover: true,
-		href: "/pesquisa",
+		href: "/pesquisa-legislativa",
 		activeVariant: "limanjar",
 	},
 	{

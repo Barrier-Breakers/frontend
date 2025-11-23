@@ -46,10 +46,10 @@ export function SidebarContent({
 	};
 
 	return (
-		<>
+		<div className="flex flex-col h-full">
 			{/* Close Button - Only on Mobile */}
 			{isMobile && (
-				<div className="p-3 flex justify-end">
+				<div className="p-3 flex justify-end flex-shrink-0">
 					<Button
 						variant="nevasca"
 						size="icon"
@@ -62,7 +62,7 @@ export function SidebarContent({
 			)}
 
 			{/* Sidebar Content */}
-			<nav className="flex-1 flex flex-col gap-2 p-2 pr-3">
+			<nav className="flex-1 flex flex-col gap-1 px-2 py-1 pr-3 overflow-y-auto min-h-0">
 				{navItems.map((item: NavItem) => {
 					const active = isActive(item.href);
 					const isHovering = hoveredItemId === item.id;
@@ -101,7 +101,7 @@ export function SidebarContent({
 			</nav>
 
 			{/* Logout Button */}
-			<div className="p-3 border-t-2 border-black">
+			<div className="p-3 border-t-2 border-black flex-shrink-0">
 				<Button
 					variant="frambos"
 					className="w-full h-10 flex items-center gap-3 px-3 py-3 justify-start cursor-pointer"
@@ -116,6 +116,6 @@ export function SidebarContent({
 					)}
 				</Button>
 			</div>
-		</>
+		</div>
 	);
 }

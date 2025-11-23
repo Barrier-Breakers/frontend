@@ -19,7 +19,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 				onClick={onClose}
 			/>
 			<aside
-				className={`fixed left-0 top-0 h-full w-80 bg-white flex flex-col shadow-lg z-40 transition-transform duration-300 ease-in-out border-r-4 border-black ${
+				className={`fixed left-0 top-0 h-screen w-80 bg-white flex flex-col shadow-lg z-40 transition-transform duration-300 ease-in-out border-r-4 border-black overflow-hidden ${
 					isOpen ? "translate-x-0" : "-translate-x-full"
 				}`}
 			>

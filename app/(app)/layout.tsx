@@ -11,7 +11,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
-		<div className="h-screen flex flex-col md:flex-row">
+		<div className="h-screen w-screen overflow-hidden flex flex-col md:flex-row">
 			{/* Desktop Sidebar */}
 			<Sidebar
 				isExpanded={isExpanded}

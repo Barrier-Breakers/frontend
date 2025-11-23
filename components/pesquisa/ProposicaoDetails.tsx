@@ -352,7 +352,7 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 										{formatTime(currentTime)} / {formatTime(duration)}
 									</div>
 
-									<div className="ml-2 relative flex items-center">
+									{/* <div className="ml-2 relative flex items-center">
 										<div className="group relative">
 											<Button
 												variant="ghost"
@@ -396,7 +396,7 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 												</div>
 											</div>
 										</div>
-									</div>
+									</div> */}
 								</div>
 							) : loadingAudio ? (
 								<div className="flex items-center gap-2">

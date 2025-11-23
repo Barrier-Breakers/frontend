@@ -11,7 +11,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
-		<div className="min-h-screen flex flex-col md:flex-row">
+		<div className="h-screen flex flex-col md:flex-row">
 			{/* Desktop Sidebar */}
 			<Sidebar
 				isExpanded={isExpanded}
@@ -29,7 +29,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
 			<MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
 			{/* Main Content Container */}
-			<div className="flex-1 flex flex-col">
+			<div className="flex-1">
 				<MainContent>{children}</MainContent>
 			</div>
 		</div>

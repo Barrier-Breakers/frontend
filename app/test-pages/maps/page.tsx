@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
-import { Compass, Plus, Minus } from "lucide-react";
+import { Compass, Plus, Minus, ThumbsUp, ThumbsDown } from "lucide-react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Input } from "@/components/ui/input";
@@ -66,46 +66,73 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({ mapRef }) => {
 };
 
 const generateRandomEvents = (userLat: number, userLng: number) => {
-	const randomOffset = () => (Math.random() * 0.0009 + 0.0001) * (Math.random() > 0.5 ? 1 : -1);
+	const randomOffset = () => (Math.random() * 0.005 + 0.0001) * (Math.random() > 0.5 ? 1 : -1);
 
-	return [
-		{
-			id: 1,
-			title: "Denúncia 1",
-			address: "Endereço da denuncia 1",
-			description: "Descrição da denuncia 1",
-			location: {
-				latitude: userLat + randomOffset(),
-				longitude: userLng + randomOffset(),
-			},
-			risco: "alto",
-			votos: 5,
-		},
-		{
-			id: 2,
-			title: "Denúncia 2",
-			address: "Endereço da denuncia 2",
-			description: "Descrição da denuncia 2",
-			location: {
-				latitude: userLat + randomOffset(),
-				longitude: userLng + randomOffset(),
-			},
-			risco: "medio",
-			votos: 3,
-		},
-		{
-			id: 3,
-			title: "Denúncia 3",
-			address: "Endereço da denuncia 3",
-			description: "Descrição da denuncia 3",
-			location: {
-				latitude: userLat + randomOffset(),
-				longitude: userLng + randomOffset(),
-			},
-			risco: "baixo",
-			votos: 8,
-		},
+	const titles = [
+		"Denúncia de Violência Doméstica",
+		"Assédio Sexual no Transporte Público",
+		"Discriminação Racial no Trabalho",
+		"Violência contra LGBTQIA+",
+		"Abuso Infantil",
+		"Violência contra Mulheres",
+		"Discriminação por Deficiência",
+		"Assédio Moral no Ambiente de Trabalho",
+		"Violência contra Idosos",
+		"Discriminação Religiosa",
+		"Violência no Namoro",
+		"Abuso Sexual contra Crianças",
 	];
+
+	const descriptions = [
+		"Relato de agressão física em ambiente doméstico",
+		"Incidente de assédio em ônibus lotado",
+		"Funcionária demitida por motivo racial",
+		"Ataque homofóbico em estabelecimento comercial",
+		"Suspeita de negligência infantil",
+		"Agressão contra mulher em via pública",
+		"Negação de acesso por deficiência",
+		"Ambiente de trabalho tóxico com humilhações",
+		"Idoso espancado por vizinhos",
+		"Recusa de atendimento por crença religiosa",
+		"Parceiro controlador e agressivo",
+		"Professor suspeito de abuso contra alunos",
+	];
+
+	const addresses = [
+		"Rua das Flores, 123 - Centro",
+		"Avenida Brasil, 456 - Jardim América",
+		"Praça da República, 789 - Liberdade",
+		"Rua São João, 321 - Vila Nova",
+		"Avenida Paulista, 654 - Bela Vista",
+		"Rua Augusta, 987 - Consolação",
+		"Praça Roosevelt, 147 - República",
+		"Rua Oscar Freire, 258 - Jardins",
+		"Avenida Brigadeiro, 369 - Paraíso",
+		"Rua da Consolação, 741 - Higienópolis",
+		"Praça da Sé, 852 - Sé",
+		"Rua 25 de Março, 963 - Centro",
+	];
+
+	const riscos = ["baixo", "medio", "alto"];
+
+	const numEvents = Math.floor(Math.random() * 5) + 8; // 8-12 eventos
+
+	return Array.from({ length: numEvents }, (_, i) => ({
+		id: i + 1,
+		title: titles[Math.floor(Math.random() * titles.length)],
+		address: addresses[Math.floor(Math.random() * addresses.length)],
+		description: descriptions[Math.floor(Math.random() * descriptions.length)],
+		location: {
+			latitude: userLat + randomOffset(),
+			longitude: userLng + randomOffset(),
+		},
+		risco: riscos[Math.floor(Math.random() * riscos.length)],
+		votos: Math.floor(Math.random() * 50) + 1,
+		upvotes: Math.floor(Math.random() * 50) + 1,
+		downvotes: Math.floor(Math.random() * 10),
+		medias: [],
+		comentarios: [],
+	}));
 };
 
 const Page = () => {
@@ -138,11 +165,6 @@ const Page = () => {
 		if (activeMarkerRef.current) {
 			const { element } = activeMarkerRef.current;
 			element.classList.remove("marker-active");
-			// Remover escala de cinza dos outros markers
-			eventMarkersRef.current.forEach((marker) => {
-				const el = marker.getElement();
-				el.classList.remove("marker-grayscale");
-			});
 			activeMarkerRef.current = null;
 			setActiveEvent(null);
 		}
@@ -158,14 +180,6 @@ const Page = () => {
 
 			// Adicionar classe ativa ao marker clicado
 			element.classList.add("marker-active");
-
-			// Adicionar escala de cinza aos outros markers
-			eventMarkersRef.current.forEach((m) => {
-				if (m !== marker) {
-					const el = m.getElement();
-					el.classList.add("marker-grayscale");
-				}
-			});
 
 			// Log do evento
 			console.log("✅ Marker ativado:");
@@ -184,11 +198,39 @@ const Page = () => {
 		[]
 	);
 
+	const handleUpvote = (eventId: string | number) => {
+		setDynamicEvents((prev) =>
+			prev.map((e) =>
+				String(e.id) === String(eventId)
+					? { ...e, upvotes: (e.upvotes ?? e.votos ?? 0) + 1 }
+					: e
+			)
+		);
+		if (String(activeEvent?.id) === String(eventId)) {
+			setActiveEvent((prev) =>
+				prev ? { ...prev, upvotes: (prev.upvotes ?? prev.votos ?? 0) + 1 } : prev
+			);
+		}
+	};
+
+	const handleDownvote = (eventId: string | number) => {
+		setDynamicEvents((prev) =>
+			prev.map((e) =>
+				String(e.id) === String(eventId) ? { ...e, downvotes: (e.downvotes ?? 0) + 1 } : e
+			)
+		);
+		if (String(activeEvent?.id) === String(eventId)) {
+			setActiveEvent((prev) =>
+				prev ? { ...prev, downvotes: (prev.downvotes ?? 0) + 1 } : prev
+			);
+		}
+	};
+
 	// Determinar cor baseada no risco
 	const colorMap: Record<string, string> = {
-		alto: "#ef4444",
-		medio: "#f97316",
-		baixo: "#60a5fa",
+		alto: "#da3263", // frambos - vermelho/rosa
+		medio: "#e8752e", // mexerica - laranja
+		baixo: "#f9df59", // bananova - amarelo
 	};
 
 	// Função para criar marker com animação de fade-in usando Tailwind
@@ -199,23 +241,58 @@ const Page = () => {
 			const markerInner = document.createElement("div");
 			const markerTriangle = document.createElement("div");
 
+			// Adicionar z-index inicial
+			markerEl.className = "z-1";
+
 			const bgColor = colorMap[risco] || "#9ca3af";
 			const bgColorClass =
 				{
-					"#ef4444": "bg-red-500",
-					"#f97316": "bg-orange-500",
-					"#60a5fa": "bg-blue-400",
+					"#da3263": "frambos", // alto - vermelho/rosa
+					"#e8752e": "mexerica", // medio - laranja
+					"#f9df59": "bananova", // baixo - amarelo
 				}[bgColor] || "bg-gray-400";
 
 			// Marker exterior (com cor de fundo, cria o anel colorido)
-			markerOuter.className = `w-14 h-14 rounded-full shadow-lg marker-animate flex items-center justify-center ${bgColorClass}`;
+			markerOuter.className = `w-14 h-14 rounded-full shadow-lg marker-animate flex items-center justify-center border-2 border-black ${bgColorClass}`;
 			markerOuter.style.position = "relative";
 			markerOuter.style.padding = "5px";
 
-			// Marker interior (branco, o círculo central)
-			markerInner.className = "w-full h-full rounded-full bg-white z-1";
+			// Marker interior (com ícone ao invés do círculo branco)
+			markerInner.className =
+				"w-full h-full rounded-full bg-white z-1 flex items-center justify-center";
+			// Escolher ícone baseado no risco
+			const getIconForRisk = (risco: string) => {
+				switch (risco) {
+					case "baixo":
+						return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>`; // Info
+					case "medio":
+						return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>`; // AlertTriangle
+					case "alto":
+						return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>`; // Flame (chama)
+					default:
+						return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>`; // Info como fallback
+				}
+			};
 
-			// Criar triângulo apontador
+			// Criar e adicionar o ícone baseado no risco
+			const iconContainer = document.createElement("div");
+			iconContainer.innerHTML = getIconForRisk(risco);
+			markerInner.appendChild(iconContainer.firstChild!);
+
+			// Criar triângulo apontador com borda
+			const markerTriangleBorder = document.createElement("div");
+			markerTriangleBorder.style.width = "0";
+			markerTriangleBorder.style.height = "0";
+			markerTriangleBorder.style.borderLeft = "16px solid transparent";
+			markerTriangleBorder.style.borderRight = "16px solid transparent";
+			markerTriangleBorder.style.borderTop = "16px solid black";
+			markerTriangleBorder.style.position = "absolute";
+			markerTriangleBorder.style.bottom = "-12px";
+			markerTriangleBorder.style.left = "50%";
+			markerTriangleBorder.style.transform = "translateX(-50%)";
+			markerTriangleBorder.style.zIndex = "0";
+
+			// Criar triângulo apontador (interior)
 			markerTriangle.style.width = "0";
 			markerTriangle.style.height = "0";
 			markerTriangle.style.borderLeft = "14px solid transparent";
@@ -225,11 +302,24 @@ const Page = () => {
 			markerTriangle.style.bottom = "-10px";
 			markerTriangle.style.left = "50%";
 			markerTriangle.style.transform = "translateX(-50%)";
+			markerTriangle.style.zIndex = "1";
 
 			markerEl.appendChild(markerOuter);
 			markerOuter.appendChild(markerInner);
+			markerOuter.appendChild(markerTriangleBorder);
 			markerOuter.appendChild(markerTriangle);
 			markerEl.style.cursor = "pointer";
+
+			// Adicionar eventos de hover para z-index
+			markerEl.addEventListener("mouseenter", () => {
+				markerEl.classList.remove("z-1");
+				markerEl.classList.add("z-2");
+			});
+
+			markerEl.addEventListener("mouseleave", () => {
+				markerEl.classList.remove("z-2");
+				markerEl.classList.add("z-1");
+			});
 
 			// Adicionar o marker ao mapa
 			const marker = new mapboxgl.Marker(markerEl)
@@ -356,6 +446,37 @@ const Page = () => {
 		};
 	}, [dynamicEvents, createAnimatedMarker]);
 
+	// Efeito: Ajustar o mapa quando o container mudar de tamanho (ex.: sidebar expand/collapse)
+	useEffect(() => {
+		let resizeTimer: number | null = null;
+		const observerTarget = mapContainerRef.current?.parentElement ?? mapContainerRef.current;
+		if (!observerTarget) return;
+
+		const ro = new ResizeObserver(() => {
+			if (!mapRef.current) return;
+			if (resizeTimer) window.clearTimeout(resizeTimer);
+			resizeTimer = window.setTimeout(() => {
+				mapRef.current?.resize();
+			}, 150);
+		});
+
+		ro.observe(observerTarget);
+
+		const handleTransitionEnd = (e: TransitionEvent) => {
+			if (!mapRef.current) return;
+			if (resizeTimer) window.clearTimeout(resizeTimer);
+			resizeTimer = window.setTimeout(() => mapRef.current?.resize(), 100);
+		};
+
+		document.addEventListener("transitionend", handleTransitionEnd);
+
+		return () => {
+			ro.disconnect();
+			document.removeEventListener("transitionend", handleTransitionEnd);
+			if (resizeTimer) window.clearTimeout(resizeTimer);
+		};
+	}, []);
+
 	// Efeito 3: Usar localização do usuário para inicializar eventos e mapa
 	useEffect(() => {
 		// Se o mapa já foi inicializado com localização, não fazer nada mais
@@ -419,10 +540,25 @@ const Page = () => {
 					>
 						{activeEvent && (
 							<>
-								<h2 className="text-lg font-bold mb-3">{activeEvent.title}</h2>
-								<p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-									{activeEvent.description}
-								</p>
+								<div className="flex items-center gap-2">
+									<button
+										className="p-1 rounded-md hover:bg-gray-100"
+										onClick={() => handleUpvote(activeEvent.id)}
+										title="Upvote"
+									>
+										<ThumbsUp size={16} />
+									</button>
+									<span className="font-semibold">
+										{activeEvent.upvotes ?? activeEvent.votos ?? 0}
+									</span>
+									<button
+										className="p-1 rounded-md hover:bg-gray-100 ml-2"
+										onClick={() => handleDownvote(activeEvent.id)}
+										title="Downvote"
+									>
+										<ThumbsDown size={16} />
+									</button>
+								</div>
 								<div className="space-y-2 text-sm">
 									<p>
 										<span className="font-semibold">Risco:</span>{" "}

@@ -214,7 +214,7 @@ const ProposicaoInsights = ({
 				{activeVersion === "simplificado" ? (
 					<div className="space-y-6">
 						<h1 className="font-semibold text-lg">Texto simplificado</h1>
-						<p className="text-justify indent-10">{simplifiedText}</p>
+						<p className="text-justify">{simplifiedText}</p>
 					</div>
 				) : (
 					<>

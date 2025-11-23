@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Legislaí — Frontend
 
-## Getting Started
+Versão frontend do projeto Legislaí: app React/Next.js para apoio à participação cívica — denúncias geolocalizadas, acompanhamento de proposições legislativas, notícias e links úteis.
 
-First, run the development server:
+Este repositório contém a interface do usuário (Next.js 16 + App Router) com integração para Mapbox, Lottie (animações), e um pequeno design system baseado em Tailwind + Radix UI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tecnologias principais
+- Next.js 16 (App Router) + React 19
+- TypeScript
+- Tailwind CSS
+- mapbox-gl & @mapbox/search-js-react
+- Lottie (react-lottie) + animações JSON em `lotties/`
+- Radix UI primitives, framer-motion
+- Serviços: `services/api.service.ts`, `services/auth.service.ts`, `services/search.service.ts`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Conteúdo (rápido)
+- `app/` — rotas do Next, páginas e APIs (inclui proxies: `app/api/proposicoes/[id]/...`)
+- `components/` — componentes de layout, UI e módulos reutilizáveis
+- `components/ui/` — primitives (button, input, card, dialog, etc.)
+- `hooks/` — hooks customizados (ex.: `useLottieAnimation`, `useProtectedRoute`)
+- `services/` — integração com API (auth, search, request wrapper)
+- `lotties/` — JSONs de animação Lottie
+- `lib/` — utilitários e dados estáticos (`links-uteis-data.ts`)
+- `public/` — recursos públicos (imgs, SVGs)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Como rodar (dev)
+Requisitos:
+- Node 18+ (recomendado)
+- pnpm / npm / yarn
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Instale dependências:
+   - `pnpm install` ou `npm install`
+2. Crie um `.env.local` (exemplo):
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:4000
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk.xxx...
+   ```
+   - `NEXT_PUBLIC_API_URL`: URL do backend. Se não definido, muitas páginas usam dados de fallback locais.
+   - `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`: token público do Mapbox (necessário para map features).
+3. Executar em dev:
+   - `pnpm dev` ou `npm run dev`
+4. Build / start (produção):
+   - `pnpm build`
+   - `pnpm start`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Comandos úteis:
+- `pnpm lint` — rodar eslint
+- `pnpm format` — prettier
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Observações e comportamento
+- Autenticação:
+  - `services/auth.service.ts` manipula login, logout, armazenamento de tokens em `localStorage` (`access_token`, `refresh_token`, `token_expires_at`).
+  - A página de callback Google (`/auth/callback`) salva tokens vindos do hash da URL.
+  - Hook `useProtectedRoute` redireciona usuários não autenticados para `/login`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Mapas / Denúncias:
+  - Página do mapa: `app/(app)/mapa-de-denuncias/page.tsx`.
+  - Requer `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`. Se `NEXT_PUBLIC_API_URL` não estiver configurado, o mapa usa dados gerados localmente como fallback.
+
+- Pesquisa legislativa:
+  - `search.service.ts` faz sugestões; se `NEXT_PUBLIC_API_URL` não estiver definido, retorna dados de mock.
+  - Detalhes de proposições e simplificação de texto + geração de áudio: `components/pesquisa/ProposicaoDetails.tsx` (trata respostas 200 e 202 e faz polling para áudio).
+
+- Proxies:
+  - Rotas em `app/api/proposicoes/[id]/...` fazem proxy para a API pública da Câmara dos Deputados, adicionando cabeçalhos e cache.
+
+- Animações:
+  - Lottie animado por hover e componentes `HoverLottieIcon` / `LottieAnimation`.
+  - Animações localizadas em `lotties/` e carregadas dinamicamente via `useLottieAnimation`.

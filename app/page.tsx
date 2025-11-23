@@ -28,9 +28,9 @@ const DesignCard = ({ icon, title, description, className = "" }: DesignCardProp
 
 export default function Home() {
 	return (
-		<div className="min-h-screen relative">
+		<div className="min-h-screen flex flex-col">
 			{/* <BackgroundDecorations /> */}
-			<div className="relative z-10">
+			<div className="flex-1 relative z-10">
 				<header className="p-4">
 					<div className="container mx-auto flex justify-between items-center">
 						<h1 className="text-3xl font-bold">Legislaí.</h1>
@@ -89,25 +89,39 @@ export default function Home() {
 					<section className="container mx-auto py-12 md:py-16">
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 							<DesignCard
-								icon={<Newspaper className="w-12 h-12 text-black" strokeWidth={1.5} />}
+								icon={
+									<Newspaper className="w-12 h-12 text-black" strokeWidth={1.5} />
+								}
 								title="Acompanhe Notícias"
 								description="Fique por dentro das últimas notícias sobre legislação e política local."
 								className="cardoso p-4 gap-2 mexerica"
 							/>
 							<DesignCard
-								icon={<BookOpen className="w-12 h-12 text-black" strokeWidth={1.5} />}
+								icon={
+									<BookOpen className="w-12 h-12 text-black" strokeWidth={1.5} />
+								}
 								title="Conheça a Legislação"
 								description="Entenda as leis e projetos que impactam sua vida. Simplificamos o juridiquês para você."
 								className="cardoso p-4 gap-2 chicletim"
 							/>
 							<DesignCard
-								icon={<CheckCircle2 className="w-12 h-12 text-black" strokeWidth={1.5} />}
+								icon={
+									<CheckCircle2
+										className="w-12 h-12 text-black"
+										strokeWidth={1.5}
+									/>
+								}
 								title="Participe de Votações"
 								description="Sua opinião é fundamental. Vote em propostas e mostre aos legisladores o que a população realmente deseja."
 								className="cardoso p-4 gap-2 abacatino"
 							/>
 							<DesignCard
-								icon={<AlertTriangle className="w-12 h-12 text-black" strokeWidth={1.5} />}
+								icon={
+									<AlertTriangle
+										className="w-12 h-12 text-black"
+										strokeWidth={1.5}
+									/>
+								}
 								title="Denuncie Problemas"
 								description="Viu um problema no seu bairro? Use o Legislaí para reportar e mobilizar a comunidade e o poder público."
 								className="cardoso p-4 gap-2 bananova"

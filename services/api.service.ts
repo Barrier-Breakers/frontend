@@ -1,3 +1,5 @@
+import { authService } from "./auth.service";
+
 const envBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const baseUrl = envBaseUrl || "http://localhost:4000";
 
@@ -22,12 +24,22 @@ export const apiService = {
 			console.debug("api.service.request - fetching:", url, options?.method);
 		}
 
+		let token: string | null = null;
+		if (typeof window !== "undefined") {
+			token = authService.getAccessToken();
+		}
+		const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+		const mergedHeaders: Record<string, string> = {
+			"Content-Type": "application/json",
+			...(options.headers || {}),
+		};
+
+		if (token) mergedHeaders.Authorization = `Bearer ${token}`;
+
 		const response = await fetch(url, {
 			...options,
-			headers: {
-				"Content-Type": "application/json",
-				...options.headers,
-			},
+			headers: mergedHeaders,
 		});
 
 		if (!response.ok) {

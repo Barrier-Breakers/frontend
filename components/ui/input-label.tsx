@@ -14,6 +14,9 @@ const InputFloat = ({
 	required,
 	value,
 	onChange,
+	onBlur,
+	ariaInvalid,
+	ariaDescribedBy,
 	autoFocus,
 	onKeyDown,
 }: {
@@ -25,6 +28,9 @@ const InputFloat = ({
 	required?: boolean;
 	value?: string;
 	onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+	ariaInvalid?: boolean;
+	ariaDescribedBy?: string;
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 	autoFocus?: boolean;
 }) => {
@@ -64,12 +70,17 @@ const InputFloat = ({
 					value={value}
 					onChange={onChange}
 					onKeyDown={onKeyDown}
+					aria-invalid={ariaInvalid}
+					aria-describedby={ariaDescribedBy}
 					placeholder={isFocused ? placeholder : " "}
 					required={required}
 					onFocus={() => setIsFocused(true)}
-					onBlur={() => setIsFocused(false)}
+					onBlur={(e) => {
+						setIsFocused(false);
+						onBlur?.(e);
+					}}
 					autoFocus={autoFocus}
-					className="dark:bg-background w-full sombroso nevasca border-2 font-semibold border-black h-12 font-lg"
+					className={`dark:bg-background w-full sombroso nevasca font-semibold h-12 font-lg transition-shadow focus:outline-none focus:ring-2 ${ariaInvalid ? "border-2 border-red-600 focus:ring-red-400" : "border-2 border-black focus:ring-black"}`}
 					autoComplete="off"
 				/>
 			</div>

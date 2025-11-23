@@ -3,6 +3,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 export interface SignUpData {
 	email: string;
 	password: string;
+	name: string;
 }
 
 export interface SignInData {
@@ -25,6 +26,15 @@ export interface GoogleSignInData {
 
 export interface GoogleSignInResponse {
 	url: string;
+}
+
+export interface OnboardingData {
+	race: string | null;
+	gender: string | null;
+	ageRange: string | null;
+	interestTopics: string[];
+	termsAccepted: boolean;
+	privacyAccepted: boolean;
 }
 
 export const authService = {
@@ -92,6 +102,24 @@ export const authService = {
 			const error = await response.json();
 			throw new Error(error.message || "Erro ao enviar link de recuperação");
 		}
+	},
+
+	async completeOnboarding(data: OnboardingData, token: string): Promise<any> {
+		const response = await fetch(`${baseUrl}/api/auth/onboarding`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			const error = await response.json();
+			throw new Error(error.message || "Erro ao completar onboarding");
+		}
+
+		return response.json();
 	},
 
 	async getCurrentUser(token: string): Promise<any> {

@@ -16,6 +16,7 @@ export default function AuthModal() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
+	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
@@ -32,7 +33,7 @@ export default function AuthModal() {
 
 		setLoading(true);
 		try {
-			const data = await authService.signUp({ email, password });
+			const data = await authService.signUp({ email, password, name });
 			authService.saveTokens(
 				data.session.access_token,
 				data.session.refresh_token || "",
@@ -42,7 +43,9 @@ export default function AuthModal() {
 			setEmail("");
 			setPassword("");
 			setConfirmPassword("");
+			setName("");
 			setMode("login");
+			router.push("/onboarding");
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erro ao criar conta. Tente novamente.");
 		} finally {
@@ -168,6 +171,19 @@ export default function AuthModal() {
 
 						{/* Form */}
 						<form onSubmit={handleSubmit} className="flex flex-col gap-4">
+							{/* Name Input - Only in Register */}
+							{mode === "register" && (
+								<InputFloat
+									placeholder="Ex. Ana Silva"
+									label="Nome"
+									type="text"
+									name="name"
+									required
+									value={name}
+									onChange={(e) => setName(e.target.value)}
+								/>
+							)}
+
 							{/* Email Input */}
 							<InputFloat
 								placeholder="Ex. ana@email.com"

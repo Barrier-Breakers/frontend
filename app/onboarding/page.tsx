@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { StarIcon, CheckIcon, BookOpen, Map, Newspaper, Search, BarChart3, Heart } from "lucide-react";
+import { StarIcon, CheckIcon, BookOpen, Map, Newspaper, Search, BarChart3, Heart, Leaf, Building2, TrendingUp, Users } from "lucide-react";
 
-// ============================================================================
 // TYPES & INTERFACES
-// ============================================================================
 
 interface Topic {
 	id: string;
@@ -28,9 +26,7 @@ interface OnboardingData {
 	privacyAccepted: boolean;
 }
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 
 const RACE_OPTIONS = ["Branco", "Preto", "Pardo", "Amarelo", "Indígena", "Prefiro não informar"];
 const GENDER_OPTIONS = ["Masculino", "Feminino", "Não-binário", "Prefiro não informar"];
@@ -40,17 +36,15 @@ const INTEREST_TOPICS: Topic[] = [
 	{ id: "education", icon: <BookOpen className="fill-black scale-150" />, title: "Educação", description: "Políticas e notícias de educação" },
 	{ id: "politics", icon: <StarIcon className="fill-black scale-150" />, title: "Política", description: "Acompanhe política e legislativo" },
 	{ id: "leisure", icon: <Heart className="fill-black scale-150" />, title: "Lazer", description: "Eventos e entretenimento" },
-	{ id: "environment", icon: <Map className="fill-black scale-150" />, title: "Meio Ambiente", description: "Questões ambientais" },
+	{ id: "environment", icon: <Leaf className="fill-black scale-150" />, title: "Meio Ambiente", description: "Questões ambientais" },
 	{ id: "health", icon: <BarChart3 className="fill-black scale-150" />, title: "Saúde", description: "Políticas de saúde pública" },
 	{ id: "transparency", icon: <Search className="fill-black scale-150" />, title: "Transparência", description: "Gastos e orçamento público" },
 	{ id: "culture", icon: <Newspaper className="fill-black scale-150" />, title: "Cultura", description: "Eventos e políticas culturais" },
-	{ id: "infrastructure", icon: <Map className="fill-black scale-150" />, title: "Infraestrutura", description: "Projetos de infraestrutura" },
+	{ id: "infrastructure", icon: <Building2 className="fill-black scale-150" />, title: "Infraestrutura", description: "Projetos de infraestrutura" },
 ];
 
 
-// ============================================================================
 // COMPONENTES UI
-// ============================================================================
 
 /** Card de tópico com animações e seleção visual */
 const TopicCard = ({ topic, isSelected, onClick }: { topic: Topic; isSelected: boolean; onClick: () => void }) => (
@@ -100,9 +94,8 @@ const ProgressDots = ({ currentStep }: { currentStep: number }) => (
 	</div>
 );
 
-// ============================================================================
+
 // MAIN COMPONENT - ONBOARDING PAGE
-// ============================================================================
 
 /**
  * ONBOARDING PAGE - 3 PASSOS SIMPLIFICADOS
@@ -140,7 +133,7 @@ export default function OnboardingPage() {
 	});
 	const [isLoading, setIsLoading] = useState(false);
 
-	// ========== HANDLERS ==========
+	// HANDLERS 
 
 	const handleTopicToggle = useCallback((topicId: string) => {
 		setData((prev) => {
@@ -203,7 +196,7 @@ export default function OnboardingPage() {
 		return step < 3 || (data.termsAccepted && data.privacyAccepted);
 	}, [step, data]);
 
-	// ========== RENDER ==========
+	//RENDER 
 
 	return (
 		<div className="min-h-screen w-full flex flex-col">
@@ -252,11 +245,11 @@ export default function OnboardingPage() {
 									<div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
 										<p className="text-base text-gray-800 leading-relaxed">
 											Para utilizar a plataforma abc, você precisa aceitar nossos{" "}
-											<a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800 font-bold">
+											<a href="/termos-condicoes" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800 font-bold">
 												Termos de Uso
 											</a>{" "}
 											e nossa{" "}
-											<a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800 font-bold">
+											<a href="/politica-privacidade" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800 font-bold">
 												Política de Privacidade
 											</a>
 											. Lembramos que seus dados são protegidos de acordo com a Lei Geral de Proteção de Dados Pessoais (LGPD) e nunca serão compartilhados com terceiros sem seu consentimento.
@@ -265,7 +258,7 @@ export default function OnboardingPage() {
 									<div className="flex items-start gap-3 p-4 border-2 border-black rounded-lg hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all">
 										<input type="checkbox" id="terms" checked={data.termsAccepted} onChange={handleCheckboxChange("termsAccepted")} className="w-6 h-6 border-2 border-black rounded cursor-pointer mt-1" />
 										<label htmlFor="terms" className="text-base font-semibold cursor-pointer flex-1">
-											Concordo com os <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
+											Concordo com os <a href="/termos-condicoes" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
 												Termos de Uso
 											</a>{" "}
 											*
@@ -274,7 +267,7 @@ export default function OnboardingPage() {
 									<div className="flex items-start gap-3 p-4 border-2 border-black rounded-lg hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all">
 										<input type="checkbox" id="privacy" checked={data.privacyAccepted} onChange={handleCheckboxChange("privacyAccepted")} className="w-6 h-6 border-2 border-black rounded cursor-pointer mt-1" />
 										<label htmlFor="privacy" className="text-base font-semibold cursor-pointer flex-1">
-											Concordo com a <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
+											Concordo com a <a href="/politica-privacidade" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
 												Política de Privacidade
 											</a>{" "}
 											*

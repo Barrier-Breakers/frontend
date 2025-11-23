@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import BackgroundDecorations from "@/components/BackgroundDecorations";
 import Footer from "@/components/Footer";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Newspaper, BookOpen, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type DesignCardProps = {
 	icon: React.ReactNode;
@@ -77,9 +77,9 @@ export default function Home() {
 								<div className="absolute -top-4 -left-8 w-16 h-16 bg-[var(--brand-blue)] rounded-full"></div>
 								<div className="absolute -bottom-4 -right-8 w-20 h-20 bg-[var(--brand-pink)] rounded-lg transform rotate-12"></div>
 								<Image
-									alt="Pessoa segurando um megafone, simbolizando que sua voz tem peso."
+									alt="Animação de pessoa segurando um megafone, simbolizando que sua voz tem peso."
 									className="relative w-48 h-48 md:w-64 md:h-64 object-cover rounded-full border-black-custom hard-shadow z-10"
-									src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFJmmbSK3rqWr_3HIqnR07zOB5ijmnvlNXRJ1voqs5IJJNwckYv1iIiTkHzlGX0C375MBZ1e1Vaf2FnzyJSWCv0QWIdRluf_fE6ZgMTGXaHKzkRWn11jVrOcGHStjynhhPSHywI6EpBUKhmell9os5V9-WgFOS12_Cp1voih113rDrUYczufhmw77Cklww0GgYo1LbMYqzpTtkyv86sHQamNYmZ01MeN0P8L5viKxKjuA6KjfRkCXZorhHMOlWacEX9tgNl_RBX6fe"
+									src="/Icone-landing-page.gif"
 									width={256}
 									height={256}
 								/>
@@ -89,25 +89,25 @@ export default function Home() {
 					<section className="container mx-auto py-12 md:py-16">
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 							<DesignCard
-								icon={<span className="material-symbols-outlined text-4xl">i</span>}
+								icon={<Newspaper className="w-12 h-12 text-black" strokeWidth={1.5} />}
 								title="Acompanhe Notícias"
 								description="Fique por dentro das últimas notícias sobre legislação e política local."
 								className="cardoso p-4 gap-2 mexerica"
 							/>
 							<DesignCard
-								icon={<span className="material-symbols-outlined text-4xl">i</span>}
+								icon={<BookOpen className="w-12 h-12 text-black" strokeWidth={1.5} />}
 								title="Conheça a Legislação"
 								description="Entenda as leis e projetos que impactam sua vida. Simplificamos o juridiquês para você."
 								className="cardoso p-4 gap-2 chicletim"
 							/>
 							<DesignCard
-								icon={<span className="material-symbols-outlined text-4xl">i</span>}
+								icon={<CheckCircle2 className="w-12 h-12 text-black" strokeWidth={1.5} />}
 								title="Participe de Votações"
 								description="Sua opinião é fundamental. Vote em propostas e mostre aos legisladores o que a população realmente deseja."
 								className="cardoso p-4 gap-2 abacatino"
 							/>
 							<DesignCard
-								icon={<span className="material-symbols-outlined text-4xl">i</span>}
+								icon={<AlertTriangle className="w-12 h-12 text-black" strokeWidth={1.5} />}
 								title="Denuncie Problemas"
 								description="Viu um problema no seu bairro? Use o Legislaí para reportar e mobilizar a comunidade e o poder público."
 								className="cardoso p-4 gap-2 bananova"

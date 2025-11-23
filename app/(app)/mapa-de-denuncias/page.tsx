@@ -4,7 +4,7 @@ import { PageTitle } from "@/components/layout/PageTitle";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
-import { Compass, Plus, Minus, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Compass, Plus, Minus, ThumbsUp, ThumbsDown, ChevronUp, ChevronDown } from "lucide-react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Input } from "@/components/ui/input";
@@ -146,6 +146,7 @@ export default function MapaDenunciasPage() {
 	const [activeEvent, setActiveEvent] = useState<MapEvent | null>(null);
 	const [termoBusca, setTermoBusca] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isFloatingPanelOpen, setIsFloatingPanelOpen] = useState(false);
 
 	function toFourDecimalPlaces(num: number) {
 		return parseFloat(num.toFixed(4));
@@ -576,8 +577,8 @@ export default function MapaDenunciasPage() {
 				title="Mapa de Denúncias"
 				description="Crie denúncias sobre irregularidades na sua região e interaja com ocorrências públicas em um mapa interativo."
 			/>
-			<div className="p-8 flex flex-1 gap-4">
-				<Card className="flex-1 cardoso p-0 overflow-hidden">
+			<div className="p-0 md:p-8 flex flex-1 gap-4 flex-col md:flex-row">
+				<Card className="flex-1 cardoso p-0 overflow-hidden md:rounded-lg rounded-none">
 					<CardContent className="h-full p-0">
 						<div
 							id="map"
@@ -585,11 +586,14 @@ export default function MapaDenunciasPage() {
 							style={{ height: "100%", width: "100%" }}
 							className="bg-[#65cafe] w-full h-full"
 							onClick={() => deactivateMarker()}
-						></div>
+						>
+							{/* Mapa renderizado aqui */}
+						</div>
 					</CardContent>
 				</Card>
 
-				<div className="w-96 flex flex-col gap-4 relative">
+				{/* Desktop Sidebar - Hidden on Mobile */}
+				<div className="hidden md:flex w-96 flex-col gap-4 relative">
 					<h1 className="font-semibold">Suas denúncias</h1>
 					<div
 						className={cn(
@@ -599,7 +603,7 @@ export default function MapaDenunciasPage() {
 					>
 						{ownedEvents.length > 0 ? (
 							ownedEvents.map((event: any) => (
-								<Card id={event.id} className="cardoso p-2">
+								<Card key={event.id} id={event.id} className="cardoso p-2">
 									<CardContent className="px-0">
 										<h2 className="font-bold">{event.title}</h2>
 										<p className="text-sm text-gray-600">{event.description}</p>
@@ -623,217 +627,289 @@ export default function MapaDenunciasPage() {
 							Criar nova denúncia
 						</Button>
 					</div>
+				</div>
 
-					{newDenunciaOpen && (
-						<Card className="cardoso absolute w-full h-full top-0 left-0 z-10 p-4">
-							<CardContent className="flex-1 p-0">
-								<h1 className="text-lg font-semibold">Nova denúncia</h1>
-								<InputFloat
-									label="Título da denúncia"
-									className="mt-4 w-full"
-									value={newTitle}
-									onChange={(e) => setNewTitle(e.target.value)}
-									onBlur={() => setTitleTouched(true)}
-									ariaInvalid={titleTouched && !newTitle.trim()}
-									ariaDescribedBy={
-										titleTouched && !newTitle.trim() ? "title-error" : undefined
-									}
-								/>
-								{titleTouched && !newTitle.trim() && (
-									<p id="title-error" className="text-sm text-red-600 mt-1">
-										Título é obrigatório
-									</p>
-								)}
-								<div className="mt-4 w-full">
-									<label className="block text-sm font-medium mb-1">
-										Descrição
-									</label>
-									<textarea
-										placeholder="Conte um pouco mais o que está acontecendo"
-										value={newDescription}
-										onChange={(e) => setNewDescription(e.target.value)}
-										aria-invalid={descriptionTouched && !newDescription.trim()}
-										aria-describedby={
-											descriptionTouched && !newDescription.trim()
-												? "description-error"
-												: undefined
-										}
-										onBlur={() => setDescriptionTouched(true)}
-										className={`w-full bg-input sombroso nevasca p-3 rounded-md min-h-[6rem] outline-none resize-none font-semibold transition-shadow focus:outline-none focus:ring-2 ${
-											descriptionTouched && !newDescription.trim()
-												? "border-2 border-red-600 focus:ring-red-400"
-												: "border-2 border-black focus:ring-black"
-										}`}
-									/>
-									{descriptionTouched && !newDescription.trim() && (
-										<p
-											id="description-error"
-											className="text-sm text-red-600 mt-1"
-										>
-											Descrição é obrigatória
+				{/* Mobile Floating Panel - Hidden on Desktop */}
+				<div className="md:hidden fixed bottom-6 right-6 z-40">
+					{!isFloatingPanelOpen ? (
+						<Button
+							onClick={() => setIsFloatingPanelOpen(true)}
+							variant="limanjar"
+							size="lg"
+							className="rounded-full w-16 h-16 p-0 shadow-lg cursor-pointer"
+						>
+							<ChevronUp className="w-6 h-6" />
+						</Button>
+					) : (
+						<Card className="cardoso w-80 max-h-96 flex flex-col shadow-xl">
+							<CardContent className="p-4 flex-1 overflow-auto">
+								<div className="flex justify-between items-center mb-4">
+									<h1 className="font-semibold text-lg">Suas denúncias</h1>
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => setIsFloatingPanelOpen(false)}
+										className="p-0"
+									>
+										<ChevronDown className="w-5 h-5" />
+									</Button>
+								</div>
+								<div className="flex flex-col gap-2">
+									{ownedEvents.length > 0 ? (
+										ownedEvents.map((event: any) => (
+											<Card
+												id={event.id}
+												key={event.id}
+												className="cardoso p-2 cursor-pointer hover:shadow-md transition-shadow"
+												onClick={() => {
+													const marker = eventMarkersRef.current.find(
+														(m) =>
+															m.getElement()?.dataset?.eventId ===
+															String(event.id)
+													);
+													if (marker) {
+														activateMarker(marker, event);
+													}
+												}}
+											>
+												<CardContent className="px-0 py-1">
+													<h2 className="font-bold text-sm">
+														{event.title}
+													</h2>
+													<p className="text-xs text-gray-600">
+														{event.description}
+													</p>
+												</CardContent>
+											</Card>
+										))
+									) : (
+										<p className="text-muted-foreground py-4 text-center text-sm">
+											Você ainda não fez nenhuma denúncia.
 										</p>
 									)}
 								</div>
-
-								<InputFloat
-									label="Tags (separe por vírgula)"
-									className="mt-4 w-full"
-									value={newTags}
-									onChange={(e) => setNewTags(e.target.value)}
-								/>
-
-								<div className="mt-4 space-y-2">
-									<h1 className="text-sm font-semibold">Localização</h1>
-									<div className="text-center bg-blue-50 rounded-lg border-2 border-blue-100 p-2 text-blue-600">
-										<p className="font-semibold">
-											Sua denúncia será criada onde o marcador azul está
-											localizado no mapa. Mova o marcador para ajustar a
-											localização com mais precisão.
-										</p>
-										<span className="text-muted-foreground text-xs">
-											lat {markerPosition?.latitude.toFixed(5)}, lon{" "}
-											{markerPosition?.longitude.toFixed(5)}
-										</span>
-									</div>
-								</div>
 							</CardContent>
-							<CardFooter className="flex justify-between p-0">
-								<Button
-									variant="nevasca"
-									onClick={() => {
-										setNewDenunciaOpen(false);
-										setTitleTouched(false);
-										setDescriptionTouched(false);
-									}}
-								>
-									Cancelar
-								</Button>
+							<CardFooter className="p-4 border-t">
 								<Button
 									variant="limanjar"
-									disabled={
-										creating || !newTitle.trim() || !newDescription.trim()
-									}
-									onClick={async () => {
-										// mark inputs as touched to show validation messages
-										setTitleTouched(true);
-										setDescriptionTouched(true);
-
-										if (!markerPosition) {
-											console.log(
-												"Por favor, posicione o marcador no mapa para definir a localização."
-											);
-											return;
-										}
-
-										if (!newTitle.trim() || !newDescription.trim()) {
-											return;
-										}
-
-										setCreating(true);
-										try {
-											const medias: string[] = [];
-											if (newMediaFile) {
-												const toDataUrl = (file: File) =>
-													new Promise<string>((resolve, reject) => {
-														const reader = new FileReader();
-														reader.onload = () =>
-															resolve(String(reader.result));
-														reader.onerror = reject;
-														reader.readAsDataURL(file);
-													});
-												const dataUrl = await toDataUrl(newMediaFile);
-												medias.push(dataUrl);
-											}
-
-											const payload = {
-												titulo: newTitle,
-												descricao: newDescription,
-												medias,
-												tags: newTags
-													.split(",")
-													.map((t) => t.trim())
-													.filter(Boolean),
-												lat: markerPosition.latitude,
-												lng: markerPosition.longitude,
-											};
-
-											const token = authService.getAccessToken();
-											const headers = token
-												? apiService.getAuthHeader(token)
-												: undefined;
-											const res = await apiService.post<any>(
-												"/api/denuncias",
-												payload,
-												headers
-											);
-
-											// If backend returns created record, use that; otherwise build one
-											const created = res?.denuncia ?? res ?? null;
-											const eventToAdd: MapEvent = created
-												? {
-														id: created.id || `denuncia-${Date.now()}`,
-														title: created.titulo || newTitle,
-														address: created.address ?? undefined,
-														description:
-															created.descricao || newDescription,
-														location: {
-															latitude: markerPosition.latitude,
-															longitude: markerPosition.longitude,
-														},
-														risco: created.status || "baixo",
-														votos: created.upvotes ?? 0,
-														upvotes: created.upvotes ?? 0,
-														downvotes: created.downvotes ?? 0,
-														medias: created.medias ?? medias,
-														comentarios: created.comentarios ?? [],
-														tags: created.tags ?? payload.tags,
-														mine: true,
-													}
-												: {
-														id: `denuncia-${Date.now()}`,
-														title: newTitle,
-														address: undefined,
-														description: newDescription,
-														location: {
-															latitude: markerPosition.latitude,
-															longitude: markerPosition.longitude,
-														},
-														risco: "baixo",
-														votos: 0,
-														upvotes: 0,
-														downvotes: 0,
-														medias,
-														comentarios: [],
-														tags: payload.tags,
-														mine: true,
-													};
-
-											setDynamicEvents((prev) => [eventToAdd, ...prev]);
-											setOwnedEvents((prev) => [eventToAdd, ...prev]);
-											setNewDenunciaOpen(false);
-											setTitleTouched(false);
-											setDescriptionTouched(false);
-											// reset form
-											setNewTitle("");
-											setNewDescription("");
-											setNewTags("");
-											setNewMediaFile(null);
-											setNewMediaPreview(null);
-										} catch (err) {
-											console.error("Erro ao criar denúncia:", err);
-											// alert("Erro ao criar denúncia. Tente novamente.");
-										} finally {
-											setCreating(false);
-										}
+									onClick={() => {
+										setNewDenunciaOpen(true);
+										setIsFloatingPanelOpen(false);
 									}}
+									className="w-full cursor-pointer text-sm"
 								>
-									{creating ? "Criando..." : "Criar denúncia"}
+									Criar nova denúncia
 								</Button>
 							</CardFooter>
 						</Card>
 					)}
 				</div>
 			</div>
+
+			{/* Dialog para criar nova denúncia - Responsivo para mobile e desktop */}
+			<Dialog open={newDenunciaOpen} onOpenChange={setNewDenunciaOpen}>
+				<DialogContent className="cardoso sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto">
+					<DialogHeader>
+						<DialogTitle>Nova denúncia</DialogTitle>
+					</DialogHeader>
+					<div className="space-y-4">
+						<InputFloat
+							label="Título da denúncia"
+							className="w-full"
+							value={newTitle}
+							onChange={(e) => setNewTitle(e.target.value)}
+							onBlur={() => setTitleTouched(true)}
+							ariaInvalid={titleTouched && !newTitle.trim()}
+							ariaDescribedBy={
+								titleTouched && !newTitle.trim() ? "title-error" : undefined
+							}
+						/>
+						{titleTouched && !newTitle.trim() && (
+							<p id="title-error" className="text-sm text-red-600">
+								Título é obrigatório
+							</p>
+						)}
+						<div className="w-full">
+							<label className="block text-sm font-medium mb-1">Descrição</label>
+							<textarea
+								placeholder="Conte um pouco mais o que está acontecendo"
+								value={newDescription}
+								onChange={(e) => setNewDescription(e.target.value)}
+								aria-invalid={descriptionTouched && !newDescription.trim()}
+								aria-describedby={
+									descriptionTouched && !newDescription.trim()
+										? "description-error"
+										: undefined
+								}
+								onBlur={() => setDescriptionTouched(true)}
+								className={`w-full bg-input sombroso nevasca p-3 rounded-md min-h-[6rem] outline-none resize-none font-semibold transition-shadow focus:outline-none focus:ring-2 ${
+									descriptionTouched && !newDescription.trim()
+										? "border-2 border-red-600 focus:ring-red-400"
+										: "border-2 border-black focus:ring-black"
+								}`}
+							/>
+							{descriptionTouched && !newDescription.trim() && (
+								<p id="description-error" className="text-sm text-red-600 mt-1">
+									Descrição é obrigatória
+								</p>
+							)}
+						</div>
+
+						<InputFloat
+							label="Tags (separe por vírgula)"
+							className="w-full"
+							value={newTags}
+							onChange={(e) => setNewTags(e.target.value)}
+						/>
+
+						<div className="space-y-2">
+							<h1 className="text-sm font-semibold">Localização</h1>
+							<div className="text-center bg-blue-50 rounded-lg border-2 border-blue-100 p-2 text-blue-600">
+								<p className="font-semibold text-sm">
+									Sua denúncia será criada onde o marcador azul está localizado no
+									mapa. Mova o marcador para ajustar a localização com mais
+									precisão.
+								</p>
+								<span className="text-muted-foreground text-xs">
+									lat {markerPosition?.latitude.toFixed(5)}, lon{" "}
+									{markerPosition?.longitude.toFixed(5)}
+								</span>
+							</div>
+						</div>
+					</div>
+					<DialogFooter className="flex gap-2 justify-end">
+						<Button
+							variant="nevasca"
+							onClick={() => {
+								setNewDenunciaOpen(false);
+								setTitleTouched(false);
+								setDescriptionTouched(false);
+							}}
+						>
+							Cancelar
+						</Button>
+						<Button
+							variant="limanjar"
+							disabled={creating || !newTitle.trim() || !newDescription.trim()}
+							onClick={async () => {
+								// mark inputs as touched to show validation messages
+								setTitleTouched(true);
+								setDescriptionTouched(true);
+
+								if (!markerPosition) {
+									console.log(
+										"Por favor, posicione o marcador no mapa para definir a localização."
+									);
+									return;
+								}
+
+								if (!newTitle.trim() || !newDescription.trim()) {
+									return;
+								}
+
+								setCreating(true);
+								try {
+									const medias: string[] = [];
+									if (newMediaFile) {
+										const toDataUrl = (file: File) =>
+											new Promise<string>((resolve, reject) => {
+												const reader = new FileReader();
+												reader.onload = () =>
+													resolve(String(reader.result));
+												reader.onerror = reject;
+												reader.readAsDataURL(file);
+											});
+										const dataUrl = await toDataUrl(newMediaFile);
+										medias.push(dataUrl);
+									}
+
+									const payload = {
+										titulo: newTitle,
+										descricao: newDescription,
+										medias,
+										tags: newTags
+											.split(",")
+											.map((t) => t.trim())
+											.filter(Boolean),
+										lat: markerPosition.latitude,
+										lng: markerPosition.longitude,
+									};
+
+									const token = authService.getAccessToken();
+									const headers = token
+										? apiService.getAuthHeader(token)
+										: undefined;
+									const res = await apiService.post<any>(
+										"/api/denuncias",
+										payload,
+										headers
+									);
+
+									// If backend returns created record, use that; otherwise build one
+									const created = res?.denuncia ?? res ?? null;
+									const eventToAdd: MapEvent = created
+										? {
+												id: created.id || `denuncia-${Date.now()}`,
+												title: created.titulo || newTitle,
+												address: created.address ?? undefined,
+												description: created.descricao || newDescription,
+												location: {
+													latitude: markerPosition.latitude,
+													longitude: markerPosition.longitude,
+												},
+												risco: created.status || "baixo",
+												votos: created.upvotes ?? 0,
+												upvotes: created.upvotes ?? 0,
+												downvotes: created.downvotes ?? 0,
+												medias: created.medias ?? medias,
+												comentarios: created.comentarios ?? [],
+												tags: created.tags ?? payload.tags,
+												mine: true,
+											}
+										: {
+												id: `denuncia-${Date.now()}`,
+												title: newTitle,
+												address: undefined,
+												description: newDescription,
+												location: {
+													latitude: markerPosition.latitude,
+													longitude: markerPosition.longitude,
+												},
+												risco: "baixo",
+												votos: 0,
+												upvotes: 0,
+												downvotes: 0,
+												medias,
+												comentarios: [],
+												tags: payload.tags,
+												mine: true,
+											};
+
+									setDynamicEvents((prev) => [eventToAdd, ...prev]);
+									setOwnedEvents((prev) => [eventToAdd, ...prev]);
+									setNewDenunciaOpen(false);
+									setTitleTouched(false);
+									setDescriptionTouched(false);
+									// reset form
+									setNewTitle("");
+									setNewDescription("");
+									setNewTags("");
+									setNewMediaFile(null);
+									setNewMediaPreview(null);
+								} catch (err) {
+									console.error("Erro ao criar denúncia:", err);
+									// alert("Erro ao criar denúncia. Tente novamente.");
+								} finally {
+									setCreating(false);
+								}
+							}}
+							className="cursor-pointer"
+						>
+							{creating ? "Criando..." : "Criar denúncia"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			{/* Dialog para mostrar detalhes do evento */}
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -8,6 +8,7 @@ export type Suggestion = {
 	ano?: number | null;
 	ementa?: string | null;
 	urlInteiroTeor?: string | null;
+	[key: string]: any;
 };
 
 export const searchService = {
@@ -46,16 +47,8 @@ export const searchService = {
 			// API returns { data: [...], total, limit, offset }
 			const res = await apiService.get<{ data: Suggestion[] }>(endpoint);
 			if (!res || !Array.isArray(res.data)) return [];
-			const mapped = res.data.map((d) => ({
-				id: d.id,
-				uri: d.uri,
-				siglaTipo: d.siglaTipo,
-				numero: d.numero,
-				ano: d.ano,
-				ementa: d.ementa,
-				urlInteiroTeor: (d as any).urlInteiroTeor || null,
-			}));
-			return mapped;
+			// Return full objects returned by the API (no mapping to a subset of fields)
+			return res.data;
 		} catch (err) {
 			console.error("searchService.suggest error", err);
 			return [];

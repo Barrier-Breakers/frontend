@@ -8,6 +8,8 @@ import searchAnimation from "@/lotties/Search.json";
 import mapAnimation from "@/lotties/Map.json";
 import calendarAnimation from "@/lotties/Calendar.json";
 import learnAnimation from "@/lotties/Learn.json";
+import linkAnimation from "@/lotties/Link.json";
+
 
 export const animations = {
 	newspaper: newsPaperAnimation,
@@ -15,4 +17,5 @@ export const animations = {
 	map: mapAnimation,
 	calendar: calendarAnimation,
 	learn: learnAnimation,
+	link: linkAnimation,
 };

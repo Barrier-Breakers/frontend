@@ -55,4 +55,13 @@ export const navItems: NavItem[] = [
 		href: "/educacao",
 		activeVariant: "limanjar",
 	},
+	// {
+	// 	id: "links-uteis",
+	// 	label: "Links Úteis",
+	// 	lottieAnimation: animations.link,
+	// 	animateOnHover: true,
+	// 	animationClassName: "h-! -translate-y-[2px] scale-95!",
+	// 	href: "/links-uteis",
+	// 	activeVariant: "limanjar",
+	// },
 ];

@@ -1,7 +1,7 @@
 "use client";
 
 import { PageTitle } from "@/components/layout/PageTitle";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import { Compass, Plus, Minus, ThumbsUp, ThumbsDown } from "lucide-react";
@@ -21,8 +21,28 @@ import { Button } from "@/components/ui/button";
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 import { apiService } from "@/services/api.service";
+import { authService } from "@/services/auth.service";
+import { cn, formatDate } from "@/lib/utils";
+import InputFloat from "@/components/ui/input-label";
 
-const generateRandomEvents = (userLat: number, userLng: number) => {
+// Definir interface para eventos mapeados (denúncias)
+export type MapEvent = {
+	id: string | number;
+	title: string;
+	address?: string;
+	description?: string;
+	location: { latitude: number; longitude: number };
+	risco: string;
+	votos?: number;
+	upvotes?: number;
+	downvotes?: number;
+	medias?: string[];
+	comentarios?: Array<any>;
+	tags?: string[];
+	mine?: boolean;
+};
+
+const generateRandomEvents = (userLat: number, userLng: number): MapEvent[] => {
 	const randomOffset = () => (Math.random() * 0.005 + 0.0005) * (Math.random() > 0.5 ? 1 : -1);
 
 	const titles = [
@@ -66,7 +86,7 @@ const generateRandomEvents = (userLat: number, userLng: number) => {
 
 	const risks = ["alto", "medio", "baixo"];
 
-	const events = [];
+	const events: MapEvent[] = [];
 	const numEvents = Math.floor(Math.random() * 5) + 8; // 8-12 eventos
 
 	for (let i = 0; i < numEvents; i++) {
@@ -100,7 +120,7 @@ export default function MapaDenunciasPage() {
 	const userLocationUsedRef = useRef(false);
 	const activeMarkerRef = useRef<{
 		marker: mapboxgl.Marker;
-		event: (typeof dynamicEvents)[0];
+		event: MapEvent;
 		element: HTMLElement;
 	} | null>(null);
 
@@ -108,8 +128,22 @@ export default function MapaDenunciasPage() {
 		latitude: number;
 		longitude: number;
 	} | null>(null);
-	const [dynamicEvents, setDynamicEvents] = useState(generateRandomEvents(0, 0));
-	const [activeEvent, setActiveEvent] = useState<(typeof dynamicEvents)[0] | null>(null);
+	const [dynamicEvents, setDynamicEvents] = useState<MapEvent[]>(generateRandomEvents(0, 0));
+	const [ownedEvents, setOwnedEvents] = useState<MapEvent[]>([]);
+	const [newTitle, setNewTitle] = useState("");
+	const [newDescription, setNewDescription] = useState("");
+	const [titleTouched, setTitleTouched] = useState(false);
+	const [descriptionTouched, setDescriptionTouched] = useState(false);
+	const [newTags, setNewTags] = useState("");
+	const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
+	const [newMediaPreview, setNewMediaPreview] = useState<string | null>(null);
+	const [creating, setCreating] = useState(false);
+	const [newDenunciaOpen, setNewDenunciaOpen] = useState(false);
+	const [markerPosition, setMarkerPosition] = useState<{
+		latitude: number;
+		longitude: number;
+	} | null>(null);
+	const [activeEvent, setActiveEvent] = useState<MapEvent | null>(null);
 	const [termoBusca, setTermoBusca] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -129,22 +163,19 @@ export default function MapaDenunciasPage() {
 	};
 
 	// Função para ativar o marker
-	const activateMarker = useCallback(
-		(marker: mapboxgl.Marker, event: (typeof dynamicEvents)[0]) => {
-			// Desativar o marker anterior se existir
-			deactivateMarker();
+	const activateMarker = useCallback((marker: mapboxgl.Marker, event: MapEvent) => {
+		// Desativar o marker anterior se existir
+		deactivateMarker();
 
-			const element = marker.getElement();
+		const element = marker.getElement();
 
-			// Adicionar classe ativa ao marker clicado
-			element.classList.add("marker-active");
+		// Adicionar classe ativa ao marker clicado
+		element.classList.add("marker-active");
 
-			activeMarkerRef.current = { marker, event, element };
-			setActiveEvent(event);
-			setIsDialogOpen(true);
-		},
-		[]
-	);
+		activeMarkerRef.current = { marker, event, element };
+		setActiveEvent(event);
+		setIsDialogOpen(true);
+	}, []);
 
 	const handleUpvote = (eventId: string | number) => {
 		setDynamicEvents((prev) =>
@@ -183,7 +214,15 @@ export default function MapaDenunciasPage() {
 
 	// Função para criar marker com animação de fade-in usando Tailwind
 	const createAnimatedMarker = useCallback(
-		(lat: number, lng: number, risco: string, event: (typeof dynamicEvents)[0]) => {
+		(lat: number, lng: number, risco: string, event: MapEvent) => {
+			// Ensure we have a valid risk value — if not, assign one for owned events
+			const allowedRisks = ["alto", "medio", "baixo"];
+			const safeRisco =
+				risco && allowedRisks.includes(risco)
+					? risco
+					: event?.mine
+						? allowedRisks[Math.floor(Math.random() * allowedRisks.length)]
+						: "baixo";
 			const markerEl = document.createElement("div");
 			const markerOuter = document.createElement("div");
 			const markerInner = document.createElement("div");
@@ -192,7 +231,7 @@ export default function MapaDenunciasPage() {
 			// Adicionar z-index inicial
 			markerEl.className = "z-1";
 
-			const bgColor = colorMap[risco] || "#9ca3af";
+			const bgColor = colorMap[safeRisco] || "#9ca3af";
 			const bgColorClass =
 				{
 					"#da3263": "frambos", // alto - vermelho/rosa
@@ -225,7 +264,7 @@ export default function MapaDenunciasPage() {
 
 			// Criar e adicionar o ícone baseado no risco
 			const iconContainer = document.createElement("div");
-			iconContainer.innerHTML = getIconForRisk(risco);
+			iconContainer.innerHTML = getIconForRisk(safeRisco);
 			markerInner.appendChild(iconContainer.firstChild!);
 
 			// Criar triângulo apontador com borda
@@ -293,6 +332,7 @@ export default function MapaDenunciasPage() {
 				(position) => {
 					const { latitude, longitude, accuracy } = position.coords;
 					setUserLocation({ latitude, longitude });
+					setMarkerPosition({ latitude, longitude });
 					console.log("✅ Localização atualizada:");
 					console.log({
 						latitude: toFourDecimalPlaces(latitude),
@@ -345,6 +385,7 @@ export default function MapaDenunciasPage() {
 
 		function onDragEnd() {
 			const lngLat = marker.getLngLat();
+			setMarkerPosition({ latitude: lngLat.lat, longitude: lngLat.lng });
 			console.log("📍 Marcador movido para:");
 			console.log({
 				latitude: toFourDecimalPlaces(lngLat.lat),
@@ -450,7 +491,9 @@ export default function MapaDenunciasPage() {
 					return;
 				}
 				try {
-					const res = await apiService.get<any>("/api/denuncias");
+					const token = authService.getAccessToken();
+					const headers = token ? apiService.getAuthHeader(token) : undefined;
+					const res = await apiService.get<any>("/api/denuncias", headers);
 					const denuncias = Array.isArray(res) ? res : (res.denuncias ?? []);
 
 					// Gerar offsets aleatórios para posicionar as denúncias ao redor do usuário
@@ -487,7 +530,11 @@ export default function MapaDenunciasPage() {
 						downvotes: d.downvotes ?? 0,
 						medias: d.medias ?? [],
 						comentarios: d.comentarios ?? [],
+						tags: d.tags || [],
+						mine: d.mine,
 					}));
+
+					setOwnedEvents(mappedEvents.filter((e: any) => e.mine));
 
 					// Atualizar estado com os eventos mapeados
 					setDynamicEvents(mappedEvents);
@@ -542,20 +589,249 @@ export default function MapaDenunciasPage() {
 					</CardContent>
 				</Card>
 
-				<div className="w-96 space-y-4">
+				<div className="w-96 flex flex-col gap-4 relative">
 					<h1 className="font-semibold">Suas denúncias</h1>
-					<div className="flex flex-col gap-2">
-						{[1, 2, 3, 4, 5].map((denuncia) => (
-							<Card key={denuncia} className="cardoso p-2">
-								<CardContent className="px-0">
-									<h2 className="font-bold">Denúncia #{denuncia}</h2>
-									<p className="text-sm text-gray-600">
-										Descrição breve da denúncia feita pelo usuário.
-									</p>
-								</CardContent>
-							</Card>
-						))}
+					<div
+						className={cn(
+							`flex flex-col gap-2`,
+							ownedEvents.length > 0 ? "flex-1" : ""
+						)}
+					>
+						{ownedEvents.length > 0 ? (
+							ownedEvents.map((event: any) => (
+								<Card id={event.id} className="cardoso p-2">
+									<CardContent className="px-0">
+										<h2 className="font-bold">{event.title}</h2>
+										<p className="text-sm text-gray-600">{event.description}</p>
+									</CardContent>
+								</Card>
+							))
+						) : (
+							<p className="text-muted-foreground py-4 text-center">
+								Você ainda não fez nenhuma denúncia.
+							</p>
+						)}
 					</div>
+					<div>
+						<Button
+							variant="limanjar"
+							onClick={() => {
+								setNewDenunciaOpen(true);
+							}}
+							className="w-full cursor-pointer"
+						>
+							Criar nova denúncia
+						</Button>
+					</div>
+
+					{newDenunciaOpen && (
+						<Card className="cardoso absolute w-full h-full top-0 left-0 z-10 p-4">
+							<CardContent className="flex-1 p-0">
+								<h1 className="text-lg font-semibold">Nova denúncia</h1>
+								<InputFloat
+									label="Título da denúncia"
+									className="mt-4 w-full"
+									value={newTitle}
+									onChange={(e) => setNewTitle(e.target.value)}
+									onBlur={() => setTitleTouched(true)}
+									ariaInvalid={titleTouched && !newTitle.trim()}
+									ariaDescribedBy={
+										titleTouched && !newTitle.trim() ? "title-error" : undefined
+									}
+								/>
+								{titleTouched && !newTitle.trim() && (
+									<p id="title-error" className="text-sm text-red-600 mt-1">
+										Título é obrigatório
+									</p>
+								)}
+								<div className="mt-4 w-full">
+									<label className="block text-sm font-medium mb-1">
+										Descrição
+									</label>
+									<textarea
+										placeholder="Conte um pouco mais o que está acontecendo"
+										value={newDescription}
+										onChange={(e) => setNewDescription(e.target.value)}
+										aria-invalid={descriptionTouched && !newDescription.trim()}
+										aria-describedby={
+											descriptionTouched && !newDescription.trim()
+												? "description-error"
+												: undefined
+										}
+										onBlur={() => setDescriptionTouched(true)}
+										className={`w-full bg-input sombroso nevasca p-3 rounded-md min-h-[6rem] outline-none resize-none font-semibold transition-shadow focus:outline-none focus:ring-2 ${
+											descriptionTouched && !newDescription.trim()
+												? "border-2 border-red-600 focus:ring-red-400"
+												: "border-2 border-black focus:ring-black"
+										}`}
+									/>
+									{descriptionTouched && !newDescription.trim() && (
+										<p
+											id="description-error"
+											className="text-sm text-red-600 mt-1"
+										>
+											Descrição é obrigatória
+										</p>
+									)}
+								</div>
+
+								<InputFloat
+									label="Tags (separe por vírgula)"
+									className="mt-4 w-full"
+									value={newTags}
+									onChange={(e) => setNewTags(e.target.value)}
+								/>
+
+								<div className="mt-4 space-y-2">
+									<h1 className="text-sm font-semibold">Localização</h1>
+									<div className="text-center bg-blue-50 rounded-lg border-2 border-blue-100 p-2 text-blue-600">
+										<p className="font-semibold">
+											Sua denúncia será criada onde o marcador azul está
+											localizado no mapa. Mova o marcador para ajustar a
+											localização com mais precisão.
+										</p>
+										<span className="text-muted-foreground text-xs">
+											lat {markerPosition?.latitude.toFixed(5)}, lon{" "}
+											{markerPosition?.longitude.toFixed(5)}
+										</span>
+									</div>
+								</div>
+							</CardContent>
+							<CardFooter className="flex justify-between p-0">
+								<Button
+									variant="nevasca"
+									onClick={() => {
+										setNewDenunciaOpen(false);
+										setTitleTouched(false);
+										setDescriptionTouched(false);
+									}}
+								>
+									Cancelar
+								</Button>
+								<Button
+									variant="limanjar"
+									disabled={
+										creating || !newTitle.trim() || !newDescription.trim()
+									}
+									onClick={async () => {
+										// mark inputs as touched to show validation messages
+										setTitleTouched(true);
+										setDescriptionTouched(true);
+
+										if (!markerPosition) {
+											console.log(
+												"Por favor, posicione o marcador no mapa para definir a localização."
+											);
+											return;
+										}
+
+										if (!newTitle.trim() || !newDescription.trim()) {
+											return;
+										}
+
+										setCreating(true);
+										try {
+											const medias: string[] = [];
+											if (newMediaFile) {
+												const toDataUrl = (file: File) =>
+													new Promise<string>((resolve, reject) => {
+														const reader = new FileReader();
+														reader.onload = () =>
+															resolve(String(reader.result));
+														reader.onerror = reject;
+														reader.readAsDataURL(file);
+													});
+												const dataUrl = await toDataUrl(newMediaFile);
+												medias.push(dataUrl);
+											}
+
+											const payload = {
+												titulo: newTitle,
+												descricao: newDescription,
+												medias,
+												tags: newTags
+													.split(",")
+													.map((t) => t.trim())
+													.filter(Boolean),
+												lat: markerPosition.latitude,
+												lng: markerPosition.longitude,
+											};
+
+											const token = authService.getAccessToken();
+											const headers = token
+												? apiService.getAuthHeader(token)
+												: undefined;
+											const res = await apiService.post<any>(
+												"/api/denuncias",
+												payload,
+												headers
+											);
+
+											// If backend returns created record, use that; otherwise build one
+											const created = res?.denuncia ?? res ?? null;
+											const eventToAdd: MapEvent = created
+												? {
+														id: created.id || `denuncia-${Date.now()}`,
+														title: created.titulo || newTitle,
+														address: created.address ?? undefined,
+														description:
+															created.descricao || newDescription,
+														location: {
+															latitude: markerPosition.latitude,
+															longitude: markerPosition.longitude,
+														},
+														risco: created.status || "baixo",
+														votos: created.upvotes ?? 0,
+														upvotes: created.upvotes ?? 0,
+														downvotes: created.downvotes ?? 0,
+														medias: created.medias ?? medias,
+														comentarios: created.comentarios ?? [],
+														tags: created.tags ?? payload.tags,
+														mine: true,
+													}
+												: {
+														id: `denuncia-${Date.now()}`,
+														title: newTitle,
+														address: undefined,
+														description: newDescription,
+														location: {
+															latitude: markerPosition.latitude,
+															longitude: markerPosition.longitude,
+														},
+														risco: "baixo",
+														votos: 0,
+														upvotes: 0,
+														downvotes: 0,
+														medias,
+														comentarios: [],
+														tags: payload.tags,
+														mine: true,
+													};
+
+											setDynamicEvents((prev) => [eventToAdd, ...prev]);
+											setOwnedEvents((prev) => [eventToAdd, ...prev]);
+											setNewDenunciaOpen(false);
+											setTitleTouched(false);
+											setDescriptionTouched(false);
+											// reset form
+											setNewTitle("");
+											setNewDescription("");
+											setNewTags("");
+											setNewMediaFile(null);
+											setNewMediaPreview(null);
+										} catch (err) {
+											console.error("Erro ao criar denúncia:", err);
+											// alert("Erro ao criar denúncia. Tente novamente.");
+										} finally {
+											setCreating(false);
+										}
+									}}
+								>
+									{creating ? "Criando..." : "Criar denúncia"}
+								</Button>
+							</CardFooter>
+						</Card>
+					)}
 				</div>
 			</div>
 
@@ -569,49 +845,46 @@ export default function MapaDenunciasPage() {
 					{activeEvent && (
 						<div className="space-y-4">
 							<div className="grid grid-cols-2 gap-4 text-sm">
-								<div>
+								<div className="flex gap-2">
 									<span className="font-semibold">Risco:</span>
-									<div className="flex items-center gap-2 mt-1">
-										<div
-											className="w-3 h-3 rounded-full"
-											style={{ backgroundColor: colorMap[activeEvent.risco] }}
-										></div>
-										<span className="capitalize">{activeEvent.risco}</span>
+									<div className="flex items-center gap-2">
+										<span
+											className="capitalize font-semibold text-md"
+											style={{ color: colorMap[activeEvent.risco] }}
+										>
+											{activeEvent.risco}
+										</span>
 									</div>
-								</div>
-								<div>
-									<span className="font-semibold">Votos:</span>
-									<p className="mt-1">{activeEvent.votos}</p>
 								</div>
 							</div>
 							<div className="grid grid-cols-2 gap-4 text-sm">
-								<div>
-									<span className="font-semibold">Upvotes:</span>
-									<p className="mt-1">
-										{activeEvent.upvotes ?? activeEvent.votos ?? 0}
-									</p>
-								</div>
-								<div>
-									<span className="font-semibold">Downvotes:</span>
-									<p className="mt-1">{activeEvent.downvotes ?? 0}</p>
-								</div>
+								<Button
+									variant="nevasca"
+									className="text-xl cursor-pointer"
+									size="lg"
+								>
+									<ThumbsDown className="h-5! w-5!" />
+									{activeEvent.downvotes ?? 0}
+								</Button>
+								<Button
+									variant="limanjar"
+									className="text-xl cursor-pointer"
+									size="lg"
+								>
+									<ThumbsUp className="h-5! w-5!" />
+									{activeEvent.upvotes ?? 0}
+								</Button>
 							</div>
 
 							{activeEvent.medias && activeEvent.medias.length > 0 && (
 								<div className="text-sm">
 									<span className="font-semibold">Mídia:</span>
 									<div className="mt-1">
-										<a
-											href={activeEvent.medias[0]}
-											target="_blank"
-											rel="noreferrer"
-										>
-											<img
-												src={activeEvent.medias[0]}
-												alt={activeEvent.title}
-												className="w-full h-40 object-cover rounded-md shadow-sm"
-											/>
-										</a>
+										<img
+											src={activeEvent.medias[0]}
+											alt={activeEvent.title}
+											className="w-full h-40 object-cover rounded-md shadow-sm border-2 border-black"
+										/>
 									</div>
 								</div>
 							)}
@@ -619,20 +892,21 @@ export default function MapaDenunciasPage() {
 								<span className="font-semibold">Endereço:</span>
 								<p className="mt-1">{activeEvent.address}</p>
 							</div>
-							<div className="grid grid-cols-2 gap-4 text-sm">
-								<div>
-									<span className="font-semibold">Latitude:</span>
-									<p className="mt-1 font-mono">
-										{toFourDecimalPlaces(activeEvent.location.latitude)}
-									</p>
+							{activeEvent?.tags?.length && activeEvent?.tags?.length > 0 && (
+								<div className="flex flex-col gap-2">
+									<span className="font-semibold">Tags:</span>
+									<div className="flex gap-2">
+										{activeEvent?.tags?.map((tag: string, index: number) => (
+											<span
+												key={index}
+												className="bg-gray-200 border-2 border-black rounded-md text-gray-800 text-xs font-semibold px-2.5 py-0.5"
+											>
+												{tag}
+											</span>
+										))}
+									</div>
 								</div>
-								<div>
-									<span className="font-semibold">Longitude:</span>
-									<p className="mt-1 font-mono">
-										{toFourDecimalPlaces(activeEvent.location.longitude)}
-									</p>
-								</div>
-							</div>
+							)}
 
 							{activeEvent.comentarios && activeEvent.comentarios.length > 0 && (
 								<div className="mt-3">
@@ -645,7 +919,9 @@ export default function MapaDenunciasPage() {
 												</div>
 												<div className="text-xs text-gray-400 mt-1">
 													<span className="font-mono">
-														{new Date(c.createdAt).toLocaleString()}
+														{formatDate(c.createdAt, {
+															includeTime: true,
+														})}
 													</span>
 												</div>
 											</div>
@@ -656,7 +932,11 @@ export default function MapaDenunciasPage() {
 						</div>
 					)}
 					<DialogFooter>
-						<Button variant="nevasca" onClick={() => setIsDialogOpen(false)}>
+						<Button
+							variant="nevasca"
+							className="cursor-pointer"
+							onClick={() => setIsDialogOpen(false)}
+						>
 							Fechar
 						</Button>
 					</DialogFooter>

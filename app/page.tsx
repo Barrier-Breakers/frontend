@@ -28,11 +28,11 @@ const DesignCard = ({ icon, title, description, className = "" }: DesignCardProp
 
 export default function Home() {
 	return (
-		<div className="min-h-screen flex flex-col">
+		<div className="max-w-7xl m-auto min-h-screen flex flex-col overflow-x-hidden">
 			{/* <BackgroundDecorations /> */}
 			<div className="flex-1 relative z-10">
 				<header className="p-4">
-					<div className="container mx-auto flex justify-between items-center">
+					<div className="max-w-full mx-auto flex justify-between items-center">
 						<div className="flex items-center gap-2">
 							<img
 								src="/logo.webp"
@@ -52,7 +52,7 @@ export default function Home() {
 					</div>
 				</header>
 				<main className="px-4 py-12 md:py-20">
-					<section className="container mx-auto grid md:grid-cols-2 items-center gap-12 text-center md:text-left pb-20 md:pb-28">
+					<section className="container mx-auto grid md:grid-cols-2 items-center gap-12 text-center md:text-left pb-20 md:pb-28 justify-items-center md:justify-items-start">
 						<div className="md:order-1">
 							<h2 className="text-4xl md:text-6xl font-extrabold mb-4">
 								Sua voz tem peso!
@@ -77,12 +77,12 @@ export default function Home() {
 								alt="Imagem ilustrativa do Legislaí"
 								width={1077}
 								height={888}
-								className="w-[500px] h-[412px] max-w-md md:max-w-none"
+								className="w-[350px] h-[290px] md:w-[500px] md:h-[412px] md:max-w-none"
 							/>
 						</div>
 					</section>
 					<section className="container mx-auto py-12 md:py-16">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center md:justify-items-start">
 							<DesignCard
 								icon={
 									<Newspaper className="w-12 h-12 text-black" strokeWidth={1.5} />

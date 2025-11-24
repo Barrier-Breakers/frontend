@@ -44,7 +44,14 @@ export default function Login() {
 			<div className="flex flex-col h-screen overflow-hidden">
 				<header className="flex-shrink-0 p-4">
 					<div className="container">
-						<h1 className="text-3xl font-bold">Legislaí.</h1>
+						<div className="flex items-center gap-2">
+							<img
+								src="/logo.webp"
+								alt="Barrier Breakers Logo"
+								className={`transition-all duration-300 max-w-20 ease-in-out w-10`}
+							/>
+							<h1 className="text-3xl font-bold">LegislAí.</h1>
+						</div>
 					</div>
 				</header>
 				<div className="flex-1 flex items-center justify-center overflow-hidden">
@@ -61,7 +68,14 @@ export default function Login() {
 		<div className="flex flex-col h-screen overflow-hidden">
 			<header className="flex-shrink-0 p-4 px-5">
 				<div className="container mx-auto flex justify-between items-center">
-					<h1 className="text-3xl font-bold">Legislaí.</h1>{" "}
+					<div className="flex items-center gap-2">
+						<img
+							src="/logo.webp"
+							alt="Barrier Breakers Logo"
+							className={`transition-all duration-300 max-w-20 ease-in-out w-10`}
+						/>
+						<h1 className="text-3xl font-bold">LegislAí.</h1>
+					</div>
 					<div className="flex items-center space-x-4">
 						<Link href="/">
 							<Button variant="nevasca" className="cursor-pointer" size="lg">

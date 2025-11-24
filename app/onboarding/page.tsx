@@ -509,56 +509,68 @@ export default function OnboardingPage() {
 											consentimento.
 										</p>
 									</div>
-									<div className="flex items-start gap-3 p-4 border-2 border-black rounded-lg hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all">
-										<input
-											type="checkbox"
+									<div
+										className="flex items-end bg-white gap-3 p-4 pb-5 border-2 border-black rounded-lg hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all cursor-pointer"
+										onClick={() =>
+											handleCheckboxChange("termsAccepted")(
+												!data.termsAccepted
+											)
+										}
+									>
+										<Checkbox
 											id="terms"
 											checked={data.termsAccepted}
-											onChange={(e) =>
+											onCheckedChange={(checked) =>
 												handleCheckboxChange("termsAccepted")(
-													e.target.checked
+													checked as boolean
 												)
 											}
-											className="w-6 h-6 border-2 border-black rounded cursor-pointer mt-1"
+											className="w-6 h-6 border-2 border-black rounded cursor-pointer flex-shrink-0 mt-1"
 										/>
 										<Label
 											htmlFor="terms"
-											className="text-base font-semibold cursor-pointer flex-1"
+											className="text-base font-semibold cursor-pointer flex-1 pointer-events-none"
 										>
 											Concordo com os{" "}
 											<Link
 												href="/termos-condicoes"
 												target="_blank"
 												rel="noopener noreferrer"
-												className="underline text-blue-600 hover:text-blue-800"
+												className="underline text-blue-600 hover:text-blue-800 pointer-events-auto"
 											>
 												Termos de Uso
 											</Link>{" "}
 											*
 										</Label>
 									</div>
-									<div className="flex items-start gap-3 p-4 border-2 border-black rounded-lg hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all">
-										<input
-											type="checkbox"
+									<div
+										className="flex items-end bg-white pb-5 gap-3 p-4 border-2 border-black rounded-lg hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all cursor-pointer"
+										onClick={() =>
+											handleCheckboxChange("privacyAccepted")(
+												!data.privacyAccepted
+											)
+										}
+									>
+										<Checkbox
 											id="privacy"
 											checked={data.privacyAccepted}
-											onChange={(e) =>
+											onCheckedChange={(checked) =>
 												handleCheckboxChange("privacyAccepted")(
-													e.target.checked
+													checked as boolean
 												)
 											}
-											className="w-6 h-6 border-2 border-black rounded cursor-pointer mt-1"
+											className="w-6 h-6 border-2 border-black rounded cursor-pointer flex-shrink-0 mt-1"
 										/>
 										<Label
 											htmlFor="privacy"
-											className="text-base font-semibold cursor-pointer flex-1"
+											className="text-base font-semibold cursor-pointer flex-1 pointer-events-none"
 										>
 											Concordo com a{" "}
 											<Link
 												href="/politica-privacidade"
 												target="_blank"
 												rel="noopener noreferrer"
-												className="underline text-blue-600 hover:text-blue-800"
+												className="underline text-blue-600 hover:text-blue-800 pointer-events-auto"
 											>
 												Política de Privacidade
 											</Link>{" "}
@@ -587,7 +599,7 @@ export default function OnboardingPage() {
 									variant="nevasca"
 									size="lg"
 									onClick={handleGoBack}
-									className="font-bold"
+									className="font-bold cursor-pointer"
 								>
 									<ArrowLeft />
 									Voltar

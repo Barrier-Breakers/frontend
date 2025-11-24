@@ -33,7 +33,14 @@ export default function Home() {
 			<div className="flex-1 relative z-10">
 				<header className="p-4">
 					<div className="container mx-auto flex justify-between items-center">
-						<h1 className="text-3xl font-bold">Legislaí.</h1>
+						<div className="flex items-center gap-2">
+							<img
+								src="/logo.webp"
+								alt="Barrier Breakers Logo"
+								className={`transition-all duration-300 max-w-20 ease-in-out w-10`}
+							/>
+							<h1 className="text-3xl font-bold">LegislAí.</h1>
+						</div>
 						<div className="flex items-center space-x-4">
 							<Link href="/login" className="text-lg font-medium hover:underline">
 								<Button size="lg" variant="limanjar" className="cursor-pointer">

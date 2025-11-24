@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SentimentCard } from "@/components/SentimentCard";
 
 type NewsItem = {
 	id: number;
@@ -176,24 +177,31 @@ export default function NoticiasPage() {
 			{/* <BackgroundDecorations /> */}
 			<PageTitle
 				title="Notícias"
-				description={`Página de notícias (placeholder). Ainda estamos construindo a integração completa; por enquanto, aqui existem exemplos de notícias. Clique em um card para ver os detalhes na mesma página.`}
+				description={`Página de notícias (placeholder). Ainda estamos construindo a integração completa; por enquanto, aqui existem exemplos de notícias. Clique em um card para ver os detalhes da notícia.`}
 			/>
 
-			<div className="px-8 -mt-2 mb-4 flex items-center justify-between">
+			{/* <div className="px-8 -mt-2 mb-4 flex items-center justify-between">
 				<h2 className="text-sm text-muted-foreground">
 					Últimas notícias • {totalCount} itens
 				</h2>
 				<div className="text-xs text-muted-foreground">
 					Exibir por: <strong>Mais recentes</strong>
 				</div>
-			</div>
+			</div> */}
 
 			{activeNews ? (
 				<div className="p-8">
-					<Button variant="nevasca" onClick={closeNews} className="mb-6">
-						<ArrowLeft />
-						Voltar
-					</Button>
+					<div className="flex flex-col md:flex-row gap-4 mb-6 md:items-end md:justify-between items-stretch">
+						<Button
+							variant="nevasca"
+							onClick={closeNews}
+							className="cursor-pointer md:w-auto w-full"
+						>
+							<ArrowLeft />
+							Voltar
+						</Button>
+						<SentimentCard newsId={activeNews.id} />
+					</div>
 					<Card className="transition-shadow cardoso py-0">
 						{activeNews.image && (
 							<div className="relative h-36 w-full overflow-hidden rounded-t-xl">
@@ -214,7 +222,10 @@ export default function NoticiasPage() {
 						<CardContent className="pb-6">
 							<div className="flex gap-2 mb-4 flex-wrap">
 								{(activeNews.tags ?? []).map((t) => (
-									<Badge key={t} className="bg-muted px-2 py-1 text-xs">
+									<Badge
+										key={t}
+										className="bg-muted px-2 py-1 text-xs text-black border-2 border-black"
+									>
 										{t}
 									</Badge>
 								))}
@@ -228,16 +239,16 @@ export default function NoticiasPage() {
 							</div>
 							<div className="mt-6 border-t pt-4 flex items-center justify-between gap-4">
 								<div className="flex items-center gap-4">
-									<button className="inline-flex items-center gap-2 text-muted-foreground hover:text-black">
+									<button className="inline-flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-black">
 										<ThumbsUp size={16} />
 										<span>Curtir</span>
 									</button>
-									<button className="inline-flex items-center gap-2 text-muted-foreground hover:text-black">
+									<button className="inline-flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-black">
 										<MessageCircle size={16} />
 										<span>{activeNews.commentsCount} comentários</span>
 									</button>
 								</div>
-								<button className="inline-flex items-center gap-2 text-muted-foreground hover:text-black">
+								<button className="inline-flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-black">
 									<Share2 size={16} />
 									<span>Compartilhar</span>
 								</button>

@@ -61,36 +61,24 @@ export default function Home() {
 								Participe, denuncie problemas e acompanhe as leis. Faça a diferença
 								na sua comunidade com o Legislaí.
 							</p>
-							{/* <div className="flex justify-center md:justify-start">
-								<a
-									className="w-full sm:w-auto bg-brand-yellow text-black font-bold py-4 px-8 rounded-lg border-black-custom hard-shadow transition-all hover:shadow-none hover:translate-x-2 hover:translate-y-2 flex items-center justify-center gap-2 text-xl"
-									href="#"
-								>
-									Faça a diferença agora
-								</a>
-							</div> */}
 							<Link href="/login" className="text-lg font-medium hover:underline">
 								<Button
 									size="lg"
 									variant="limanjar"
 									className="cursor-pointer h-14 text-lg"
 								>
-									Fazer a diferença agora
+									Fazer a diferença agora <ArrowRight />
 								</Button>
 							</Link>
 						</div>
 						<div className="flex justify-center items-center md:order-2">
-							<div className="relative inline-block">
-								<div className="absolute -top-4 -left-8 w-16 h-16 bg-[var(--brand-blue)] rounded-full"></div>
-								<div className="absolute -bottom-4 -right-8 w-20 h-20 bg-[var(--brand-pink)] rounded-lg transform rotate-12"></div>
-								<Image
-									alt="Animação de pessoa segurando um megafone, simbolizando que sua voz tem peso."
-									className="relative w-48 h-48 md:w-64 md:h-64 object-cover rounded-full border-black-custom hard-shadow z-10"
-									src="/Icone-landing-page.gif"
-									width={256}
-									height={256}
-								/>
-							</div>
+							<Image
+								src="/hero.png"
+								alt="Imagem ilustrativa do Legislaí"
+								width={1077}
+								height={888}
+								className="w-[500px] h-[412px] max-w-md md:max-w-none"
+							/>
 						</div>
 					</section>
 					<section className="container mx-auto py-12 md:py-16">

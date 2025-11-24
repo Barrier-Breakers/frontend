@@ -13,9 +13,9 @@ export function Sidebar({ isExpanded, onMouseEnter, onMouseLeave }: SidebarProps
 		<aside
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
-			className={`hidden md:flex transition-all duration-300 ease-in-out ${
+			className={`hidden md:flex transition-all duration-300 ease-in-out relative ${
 				isExpanded ? "w-72" : "w-19"
-			} bg-[#f9f5f2] flex-col gap-0`}
+			} flex-col gap-0`}
 		>
 			<div className="p-2 flex items-center gap-3 overflow-hidden">
 				<img

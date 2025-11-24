@@ -78,6 +78,8 @@ export default function Home() {
 								width={1077}
 								height={888}
 								className="w-[350px] h-[290px] md:w-[500px] md:h-[412px] md:max-w-none"
+								priority
+								fetchPriority="high"
 							/>
 						</div>
 					</section>

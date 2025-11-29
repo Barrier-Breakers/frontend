@@ -400,14 +400,8 @@ export default function NoticiasPage() {
 										<div className="text-xs text-muted-foreground flex items-center justify-between">
 											<div className="flex items-center justify-between w-full gap-2">
 												<span className="text-black">{n.author}</span>
-												{/* <span>•</span> */}
 												<span>{formatDate(n.date, { short: true })}</span>
-												{/* <span>•</span> */}
-												{/* <span>{n.readTime} min</span> */}
 											</div>
-											{/* <div className="text-muted-foreground">
-												{n.commentsCount} comentários
-											</div> */}
 										</div>
 									</div>
 								</CardContent>

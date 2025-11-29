@@ -66,7 +66,7 @@ export default function ProgressiveImage({
 
 			{/* Optional overlay while both loading */}
 			{!lowLoaded && !loaded && (
-				<div className="absolute inset-0 bg-white/10 backdrop-blur-sm z-20"></div>
+				<div className="absolute inset-0 bg-white/10 backdrop-blur-sm z-20 rounded-tl-lg rounded-tr-lg "></div>
 			)}
 		</div>
 	);

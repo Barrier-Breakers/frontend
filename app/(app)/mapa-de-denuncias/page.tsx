@@ -128,7 +128,12 @@ export default function MapaDenunciasPage() {
 		latitude: number;
 		longitude: number;
 	} | null>(null);
-	const [dynamicEvents, setDynamicEvents] = useState<MapEvent[]>(generateRandomEvents(0, 0));
+	const locationWatcherIdRef = useRef<number | null>(null);
+	const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
+	const [permissionErrorMessage, setPermissionErrorMessage] = useState<string | null>(null);
+	const [hidePermissionOverlay, setHidePermissionOverlay] = useState(false);
+	// start empty — don't render event markers until we have a user location
+	const [dynamicEvents, setDynamicEvents] = useState<MapEvent[]>([]);
 	const [ownedEvents, setOwnedEvents] = useState<MapEvent[]>([]);
 	const [newTitle, setNewTitle] = useState("");
 	const [newDescription, setNewDescription] = useState("");
@@ -147,6 +152,77 @@ export default function MapaDenunciasPage() {
 	const [termoBusca, setTermoBusca] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isFloatingPanelOpen, setIsFloatingPanelOpen] = useState(false);
+
+	const [showPermissionHelp, setShowPermissionHelp] = useState(false);
+
+	const requestLocationPermission = useCallback(async () => {
+		if (!navigator.geolocation) {
+			setPermissionErrorMessage("Navegador não oferece Geolocation.");
+			setLocationPermissionDenied(true);
+			return;
+		}
+
+		// show the overlay while the request happens, and reset any previous help
+		setHidePermissionOverlay(false);
+		setShowPermissionHelp(false);
+
+		// Check the permissions API first if available to detect denied state
+		const perms = (navigator as any).permissions;
+		try {
+			if (perms && perms.query) {
+				const status = await perms.query({ name: "geolocation" });
+				if (status.state === "denied") {
+					// we can't force the browser to show the prompt again — show help instead
+					setPermissionErrorMessage(
+						"Permissão de localização negada. Ative-a nas configurações do navegador."
+					);
+					setLocationPermissionDenied(true);
+					setShowPermissionHelp(true);
+					return;
+				}
+			}
+		} catch (err) {
+			// ignore errors from Permissions API
+		}
+
+		navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				const { latitude, longitude } = pos.coords;
+				setUserLocation({ latitude, longitude });
+				setMarkerPosition({ latitude, longitude });
+				setLocationPermissionDenied(false);
+				setPermissionErrorMessage(null);
+				// Ensure continuous watch is started (so we keep track of location updates)
+				try {
+					if (navigator.geolocation && locationWatcherIdRef.current == null) {
+						const newId = navigator.geolocation.watchPosition(
+							(position) => {
+								const { latitude, longitude } = position.coords;
+								setUserLocation({ latitude, longitude });
+								setMarkerPosition({ latitude, longitude });
+							},
+							(error) => {
+								console.error("Erro no watchPosition:", error.message);
+							},
+							{ enableHighAccuracy: true, maximumAge: 0 }
+						);
+						locationWatcherIdRef.current = newId as unknown as number;
+					}
+				} catch (err) {
+					// ignore errors creating watch
+				}
+			},
+			(err) => {
+				console.error("Erro ao solicitar permissão de localização:", err.message);
+				setPermissionErrorMessage(err.message);
+				if (err && (err as any).code === (err as any).PERMISSION_DENIED) {
+					setLocationPermissionDenied(true);
+					setShowPermissionHelp(true);
+				}
+			},
+			{ enableHighAccuracy: true, timeout: 10000 }
+		);
+	}, []);
 
 	function toFourDecimalPlaces(num: number) {
 		return parseFloat(num.toFixed(4));
@@ -318,22 +394,34 @@ export default function MapaDenunciasPage() {
 			// Adicionar evento de clique ao marker
 			markerEl.addEventListener("click", (e) => {
 				e.stopPropagation();
+				if (locationPermissionDenied) return;
 				activateMarker(marker, event);
 			});
 
+			// Add dataset for lookup elsewhere (e.g., mobile list linking)
+			try {
+				marker.getElement().dataset.eventId = String(event.id);
+			} catch (err) {
+				// ignore if element not ready
+			}
+
 			return marker;
 		},
-		[activateMarker]
+		[activateMarker, locationPermissionDenied]
 	);
 
 	// Efeito 1: Coletar geolocalização do navegador
 	useEffect(() => {
 		if (navigator.geolocation) {
-			const watchId = navigator.geolocation.watchPosition(
+			// use ref to track watch id so we can clear and re-create it
+			const id = navigator.geolocation.watchPosition(
 				(position) => {
 					const { latitude, longitude, accuracy } = position.coords;
 					setUserLocation({ latitude, longitude });
 					setMarkerPosition({ latitude, longitude });
+					// If position is obtained, reset permission denial state
+					setLocationPermissionDenied(false);
+					setPermissionErrorMessage(null);
 					console.log("✅ Localização atualizada:");
 					console.log({
 						latitude: toFourDecimalPlaces(latitude),
@@ -343,6 +431,13 @@ export default function MapaDenunciasPage() {
 				},
 				(error) => {
 					console.error("❌ Erro ao obter localização:", error.message);
+					// Show a friendly overlay if permission denied, otherwise keep logging
+					if (error && (error as any).code === (error as any).PERMISSION_DENIED) {
+						setLocationPermissionDenied(true);
+						setPermissionErrorMessage(error.message);
+					} else {
+						setPermissionErrorMessage(error.message || String(error));
+					}
 				},
 				{
 					enableHighAccuracy: true,
@@ -351,7 +446,12 @@ export default function MapaDenunciasPage() {
 				}
 			);
 
-			return () => navigator.geolocation.clearWatch(watchId);
+			locationWatcherIdRef.current = id as unknown as number;
+			return () => {
+				if (locationWatcherIdRef.current != null) {
+					navigator.geolocation.clearWatch(locationWatcherIdRef.current);
+				}
+			};
 		}
 	}, []);
 
@@ -376,25 +476,7 @@ export default function MapaDenunciasPage() {
 			},
 		});
 
-		const marker = new mapboxgl.Marker({
-			draggable: true,
-		})
-			.setLngLat([0, 0])
-			.addTo(mapRef.current);
-
-		userMarkerRef.current = marker;
-
-		function onDragEnd() {
-			const lngLat = marker.getLngLat();
-			setMarkerPosition({ latitude: lngLat.lat, longitude: lngLat.lng });
-			console.log("📍 Marcador movido para:");
-			console.log({
-				latitude: toFourDecimalPlaces(lngLat.lat),
-				longitude: toFourDecimalPlaces(lngLat.lng),
-			});
-		}
-
-		marker.on("dragend", onDragEnd);
+		// Defer creating the draggable user marker until we have the user's location
 		mapInitializedRef.current = true;
 
 		return () => mapRef.current?.remove();
@@ -403,6 +485,8 @@ export default function MapaDenunciasPage() {
 	// Efeito 2.5: Criar markers dos eventos quando o mapa e eventos estiverem prontos
 	useEffect(() => {
 		if (!mapRef.current || !mapInitializedRef.current) return;
+		// Don't create event markers until we have the user's location
+		if (!userLocation) return;
 
 		// Esperar o mapa estar pronto
 		const createMarkers = () => {
@@ -419,6 +503,13 @@ export default function MapaDenunciasPage() {
 						event.risco,
 						event
 					);
+					// Attach event id as dataset for easier lookup elsewhere
+					try {
+						const el = marker.getElement();
+						el.dataset.eventId = String(event.id);
+					} catch (err) {
+						// ignore if element not accessible
+					}
 					eventMarkersRef.current.push(marker);
 				}, index * 100);
 			});
@@ -436,6 +527,28 @@ export default function MapaDenunciasPage() {
 			}
 		};
 	}, [dynamicEvents, createAnimatedMarker]);
+
+	// If the user denied location, disable map interactions, else enable them
+	useEffect(() => {
+		if (!mapRef.current) return;
+		try {
+			if (locationPermissionDenied) {
+				mapRef.current.scrollZoom.disable();
+				mapRef.current.dragPan.disable();
+				mapRef.current.touchZoomRotate.disable();
+				mapRef.current.doubleClickZoom.disable();
+				mapRef.current.boxZoom.disable();
+			} else {
+				mapRef.current.scrollZoom.enable();
+				mapRef.current.dragPan.enable();
+				mapRef.current.touchZoomRotate.enable();
+				mapRef.current.doubleClickZoom.enable();
+				mapRef.current.boxZoom.enable();
+			}
+		} catch (err) {
+			// ignore — some controls may not be available depending on map config
+		}
+	}, [locationPermissionDenied]);
 
 	// Efeito: Ajustar o mapa quando o container mudar de tamanho (ex.: sidebar expand/collapse)
 	useEffect(() => {
@@ -559,8 +672,32 @@ export default function MapaDenunciasPage() {
 				duration: 1000,
 			});
 
-			// Atualizar posição do marcador
-			userMarkerRef.current?.setLngLat(userCenter);
+			// Atualizar ou criar o marcador do usuário somente agora que temos a localização
+			if (!userMarkerRef.current && mapRef.current) {
+				const marker = new mapboxgl.Marker({ draggable: true })
+					.setLngLat(userCenter)
+					.addTo(mapRef.current);
+
+				function onDragEnd() {
+					const lngLat = marker.getLngLat();
+					setMarkerPosition({ latitude: lngLat.lat, longitude: lngLat.lng });
+					console.log("📍 Marcador movido para:");
+					console.log({
+						latitude: toFourDecimalPlaces(lngLat.lat),
+						longitude: toFourDecimalPlaces(lngLat.lng),
+					});
+				}
+
+				marker.on("dragend", onDragEnd);
+				// Ensure initial marker position is set to the user's location
+				setMarkerPosition({
+					latitude: userLocation.latitude,
+					longitude: userLocation.longitude,
+				});
+				userMarkerRef.current = marker;
+			} else {
+				userMarkerRef.current?.setLngLat(userCenter);
+			}
 
 			// Marcar que já usamos a localização do usuário
 			userLocationUsedRef.current = true;
@@ -577,17 +714,77 @@ export default function MapaDenunciasPage() {
 				title="Mapa de Denúncias"
 				description="Crie denúncias sobre irregularidades na sua região e interaja com ocorrências públicas em um mapa interativo."
 			/>
-			<div className="p-0 md:p-8 flex flex-1 gap-4 flex-col md:flex-row">
+			<div className="p-0 md:p-8 flex flex-1 gap-4 flex-col md:flex-row relative">
 				<Card className="flex-1 cardoso p-0 overflow-hidden md:rounded-lg rounded-none">
 					<CardContent className="h-full p-0">
 						<div
 							id="map"
 							ref={mapContainerRef}
 							style={{ height: "100%", width: "100%" }}
-							className="bg-[#65cafe] w-full h-full"
+							className="bg-[#65cafe] w-full h-full relative"
 							onClick={() => deactivateMarker()}
 						>
 							{/* Mapa renderizado aqui */}
+
+							{locationPermissionDenied && !hidePermissionOverlay && (
+								<div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+									<div className="bg-white p-6 rounded-lg shadow-lg pointer-events-auto w-[min(90%,420px)] text-center">
+										<h3 className="text-lg font-semibold">
+											Permissão de localização negada
+										</h3>
+										<p className="mt-2 text-sm text-gray-700">
+											Para usar a página de mapa você precisa permitir o
+											acesso à sua localização. Sem essa permissão, recursos
+											como centralizar no seu local e criar denúncias não
+											funcionarão corretamente.
+										</p>
+										<div className="flex gap-2 mt-4 justify-center">
+											<Button
+												variant="limanjar"
+												onClick={requestLocationPermission}
+												className="cursor-pointer"
+											>
+												Tentar novamente
+											</Button>
+											<Button
+												variant="nevasca"
+												onClick={() =>
+													setShowPermissionHelp(!showPermissionHelp)
+												}
+												className="cursor-pointer"
+											>
+												Como ativar
+											</Button>
+										</div>
+										{showPermissionHelp && (
+											<div className="mt-3 text-left text-sm text-gray-700">
+												<p>
+													Se você negou o acesso, siga as instruções
+													abaixo para reabilitar a localização para este
+													site:
+												</p>
+												<ol className="mt-2 list-decimal ml-5 text-xs text-gray-500">
+													<li>
+														Desktop (Chrome/Edge): clique no cadeado à
+														esquerda da barra de URL → Configurações do
+														site → Localização → Permitir. Recarregue a
+														página.
+													</li>
+													<li>
+														Firefox: clique no cadeado → Permissões →
+														Localização → Permitir. Recarregue a página.
+													</li>
+													<li>
+														Mobile (iOS/Android): abra as configurações
+														do navegador no sistema e permita a
+														localização para este site.
+													</li>
+												</ol>
+											</div>
+										)}
+									</div>
+								</div>
+							)}
 						</div>
 					</CardContent>
 				</Card>
@@ -620,9 +817,10 @@ export default function MapaDenunciasPage() {
 						<Button
 							variant="limanjar"
 							onClick={() => {
-								setNewDenunciaOpen(true);
+								if (!locationPermissionDenied) setNewDenunciaOpen(true);
 							}}
 							className="w-full cursor-pointer"
+							disabled={locationPermissionDenied}
 						>
 							Criar nova denúncia
 						</Button>
@@ -662,6 +860,7 @@ export default function MapaDenunciasPage() {
 												key={event.id}
 												className="cardoso p-2 cursor-pointer hover:shadow-md transition-shadow"
 												onClick={() => {
+													if (locationPermissionDenied) return;
 													const marker = eventMarkersRef.current.find(
 														(m) =>
 															m.getElement()?.dataset?.eventId ===
@@ -693,10 +892,11 @@ export default function MapaDenunciasPage() {
 								<Button
 									variant="limanjar"
 									onClick={() => {
-										setNewDenunciaOpen(true);
+										if (!locationPermissionDenied) setNewDenunciaOpen(true);
 										setIsFloatingPanelOpen(false);
 									}}
 									className="w-full cursor-pointer text-sm"
+									disabled={locationPermissionDenied}
 								>
 									Criar nova denúncia
 								</Button>

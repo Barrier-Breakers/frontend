@@ -326,51 +326,49 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 				<div className="sm:block hidden">
 					<Card className="cardoso py-2 pr-3">
 						<div className="flex items-center gap-3 px-4 py-2">
-							{loadingSimplify ? (
-								<div className="text-sm text-muted-foreground">Carregando...</div>
-							) : audioUrl ? (
-								<div className="flex items-center gap-3">
-									<Button
-										variant="bananova"
-										className="py-4! cursor-pointer"
-										size="sm"
-										onClick={togglePlay}
-									>
-										{isPlaying ? <Pause /> : <Play />}
-									</Button>
+							{/* Always show the player, but toggle button icon & disable controls while audio is loading */}
+							<div className="flex items-center gap-3">
+								<Button
+									variant="bananova"
+									className="py-4! cursor-pointer"
+									size="sm"
+									onClick={togglePlay}
+									disabled={!audioUrl || loadingAudio || loadingSimplify}
+									aria-label={
+										loadingAudio || (loadingSimplify && !audioUrl)
+											? "Carregando áudio"
+											: audioUrl
+												? isPlaying
+													? "Pausa"
+													: "Reproduzir"
+												: "Sem áudio"
+									}
+								>
+									{loadingAudio || (loadingSimplify && !audioUrl) ? (
+										<Spinner className="w-4 h-4" />
+									) : isPlaying ? (
+										<Pause />
+									) : (
+										<Play />
+									)}
+								</Button>
 
-									<Slider
-										min={0}
-										max={1}
-										step={0.001}
-										value={duration ? [currentTime / duration] : [0]}
-										onValueChange={(values: number[]) => seekTo(values[0] ?? 0)}
-										aria-label="Seek"
-										className="w-44 cursor-pointer"
-										trackClassName="bg-gray-300"
-										rangeClassName=""
-									/>
-									<div className="text-sm w-20 text-right">
-										{formatTime(currentTime)} / {formatTime(duration)}
-									</div>
+								<Slider
+									min={0}
+									max={1}
+									step={0.001}
+									value={duration ? [currentTime / duration] : [0]}
+									onValueChange={(values: number[]) => seekTo(values[0] ?? 0)}
+									aria-label="Seek"
+									className="w-44 cursor-pointer"
+									trackClassName="bg-gray-300"
+									rangeClassName=""
+									disabled={!audioUrl || loadingAudio || loadingSimplify}
+								/>
+								<div className="text-sm w-20 text-right">
+									{formatTime(currentTime)} / {formatTime(duration)}
 								</div>
-							) : loadingAudio ? (
-								<div className="flex items-center gap-2">
-									<Spinner className="w-4 h-4" />
-									<div className="text-sm text-muted-foreground">
-										Preparando áudio...
-									</div>
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={() => cancelAudioGeneration()}
-									>
-										Cancelar
-									</Button>
-								</div>
-							) : (
-								<div className="text-sm text-muted-foreground">Sem áudio</div>
-							)}
+							</div>
 						</div>
 						{error ? (
 							<div className="px-4 py-2">
@@ -396,54 +394,48 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 					<div className="px-6 py-4 block sm:hidden">
 						<Card className="cardoso py-2">
 							<div className="flex items-center gap-3 px-4 py-2">
-								{loadingSimplify ? (
-									<div className="text-sm text-muted-foreground">
-										Carregando...
-									</div>
-								) : audioUrl ? (
-									<div className="flex items-center gap-3 w-full">
-										<Button
-											variant="bananova"
-											className="py-4! cursor-pointer"
-											size="sm"
-											onClick={togglePlay}
-										>
-											{isPlaying ? <Pause /> : <Play />}
-										</Button>
+								{/* Always show the player on mobile too */}
+								<div className="flex items-center gap-3 w-full">
+									<Button
+										variant="bananova"
+										className="py-4! cursor-pointer"
+										size="sm"
+										onClick={togglePlay}
+										disabled={!audioUrl || loadingAudio || loadingSimplify}
+										aria-label={
+											loadingAudio || (loadingSimplify && !audioUrl)
+												? "Carregando áudio"
+												: audioUrl
+													? isPlaying
+														? "Pausa"
+														: "Reproduzir"
+													: "Sem áudio"
+										}
+									>
+										{loadingAudio || (loadingSimplify && !audioUrl) ? (
+											<Spinner className="w-4 h-4" />
+										) : isPlaying ? (
+											<Pause />
+										) : (
+											<Play />
+										)}
+									</Button>
 
-										<Slider
-											min={0}
-											max={1}
-											step={0.001}
-											value={duration ? [currentTime / duration] : [0]}
-											onValueChange={(values: number[]) =>
-												seekTo(values[0] ?? 0)
-											}
-											aria-label="Seek"
-											className="w-1/2 cursor-pointer"
-											trackClassName="bg-neutral-200 dark:bg-neutral-800"
-										/>
-										<div className="text-sm w-20 text-right">
-											{formatTime(currentTime)} / {formatTime(duration)}
-										</div>
+									<Slider
+										min={0}
+										max={1}
+										step={0.001}
+										value={duration ? [currentTime / duration] : [0]}
+										onValueChange={(values: number[]) => seekTo(values[0] ?? 0)}
+										aria-label="Seek"
+										className="w-1/2 cursor-pointer"
+										trackClassName="bg-neutral-200 dark:bg-neutral-800"
+										disabled={!audioUrl || loadingAudio || loadingSimplify}
+									/>
+									<div className="text-sm w-20 text-right">
+										{formatTime(currentTime)} / {formatTime(duration)}
 									</div>
-								) : loadingAudio ? (
-									<div className="flex items-center gap-2">
-										<Spinner className="w-4 h-4" />
-										<div className="text-sm text-muted-foreground">
-											Preparando áudio...
-										</div>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => cancelAudioGeneration()}
-										>
-											Cancelar
-										</Button>
-									</div>
-								) : (
-									<div className="text-sm text-muted-foreground">Sem áudio</div>
-								)}
+								</div>
 							</div>
 							{error ? (
 								<div className="px-4 py-2">

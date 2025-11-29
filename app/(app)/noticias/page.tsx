@@ -1,5 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
+import ProgressiveImage from "@/components/ui/ProgressiveImage";
+
 import { useState } from "react";
 import { ThumbsUp, MessageCircle, Share2, ArrowLeft } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
@@ -30,7 +33,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "Relatório preliminar aponta indícios de sobrepreço em contratos públicos.",
 		date: new Date().toISOString(),
 		author: "Equipe de Reportagem",
-		image: "https://picsum.photos/seed/lic1/1200/600",
+		image: "https://picsum.photos/seed/lic1/800/400",
 		tags: ["Licitação", "Fiscalização"],
 		commentsCount: 12,
 		readTime: 3,
@@ -46,7 +49,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "Recursos vão revitalizar infraestrutura esportiva de escola municipal.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
 		author: "Assessoria de Comunicação",
-		image: "https://picsum.photos/seed/escola4/1200/600",
+		image: "https://picsum.photos/seed/escola4/800/400",
 		tags: ["Educação", "Investimento"],
 		commentsCount: 3,
 		readTime: 2,
@@ -61,7 +64,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "Nova versão traz ferramentas de geolocalização e anexo de evidências.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
 		author: "Equipe Técnica",
-		image: "https://picsum.photos/seed/denuncia5/1200/600",
+		image: "https://picsum.photos/seed/denuncia5/800/400",
 		tags: ["Tecnologia", "Cidadania"],
 		commentsCount: 6,
 		readTime: 3,
@@ -76,7 +79,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "Categoria reivindica medidas para evitar paralisação em serviços essenciais.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
 		author: "Sindicato Local",
-		image: "https://picsum.photos/seed/sindicato6/1200/600",
+		image: "https://picsum.photos/seed/sindicato6/800/400",
 		tags: ["Trabalho", "Serviços Públicos"],
 		commentsCount: 9,
 		readTime: 4,
@@ -91,7 +94,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "Programa pode gerar renda e reduzir descarte incorreto de resíduos.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
 		author: "Vereadores",
-		image: "https://picsum.photos/seed/reciclagem7/1200/600",
+		image: "https://picsum.photos/seed/reciclagem7/800/400",
 		tags: ["Meio Ambiente", "Política"],
 		commentsCount: 10,
 		readTime: 3,
@@ -107,7 +110,7 @@ const sampleNews: NewsItem[] = [
 			"Moradores discutem prioridades e a qualidade de atendimento nas unidades básicas.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
 		author: "Portal Saúde",
-		image: "https://picsum.photos/seed/saude8/1200/600",
+		image: "https://picsum.photos/seed/saude8/800/400",
 		tags: ["Saúde", "Participação"],
 		commentsCount: 7,
 		readTime: 5,
@@ -122,7 +125,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "A proposta visa aumentar a abertura de dados e mecanismos de fiscalização.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
 		author: "Redação",
-		image: "https://picsum.photos/seed/transp2/1200/600",
+		image: "https://picsum.photos/seed/transp2/800/400",
 		tags: ["Projeto de Lei", "Transparência"],
 		commentsCount: 4,
 		readTime: 5,
@@ -138,7 +141,7 @@ const sampleNews: NewsItem[] = [
 		excerpt: "Moradores denunciam uso inadequado de recursos em obra local.",
 		date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
 		author: "Correspondente Local",
-		image: "https://picsum.photos/seed/verba3/1200/600",
+		image: "https://picsum.photos/seed/verba3/800/400",
 		tags: ["Denúncia", "Obra Pública"],
 		commentsCount: 21,
 		readTime: 4,
@@ -204,13 +207,11 @@ export default function NoticiasPage() {
 					</div>
 					<Card className="transition-shadow cardoso py-0">
 						{activeNews.image && (
-							<div className="relative h-36 w-full overflow-hidden rounded-t-xl">
-								<img
-									src={activeNews.image}
-									alt={activeNews.title}
-									className="w-full h-full object-cover"
-								/>
-							</div>
+							<ProgressiveImage
+								src={activeNews.image}
+								alt={activeNews.title}
+								wrapperClass="relative h-36 w-full overflow-hidden rounded-t-xl"
+							/>
 						)}
 						<CardHeader>
 							<CardTitle>{activeNews.title}</CardTitle>
@@ -309,10 +310,10 @@ export default function NoticiasPage() {
 														<div className="flex gap-3 items-start">
 															<div className="relative h-16 w-28 overflow-hidden rounded-md">
 																{s.image ? (
-																	<img
+																	<ProgressiveImage
 																		src={s.image}
 																		alt={s.title}
-																		className="w-full h-full object-cover"
+																		wrapperClass="h-16 w-28"
 																	/>
 																) : (
 																	<div className="h-16 w-28 bg-muted" />
@@ -340,9 +341,26 @@ export default function NoticiasPage() {
 					</Card>
 				</div>
 			) : (
-				<div className="p-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+				<motion.div
+					className="p-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+					initial="hidden"
+					animate="visible"
+					variants={{
+						hidden: { opacity: 0 },
+						visible: {
+							opacity: 1,
+							transition: { staggerChildren: 0.06 },
+						},
+					}}
+				>
 					{sampleNews.map((n) => (
-						<div key={n.id}>
+						<motion.div
+							key={n.id}
+							variants={{
+								hidden: { opacity: 0, y: 8 },
+								visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+							}}
+						>
 							<Card
 								className="hover:shadow-md transition-shadow cursor-pointer overflow-hidden h-full cardoso py-0"
 								onClick={() => openNews(n)}
@@ -355,10 +373,10 @@ export default function NoticiasPage() {
 								<CardContent className="p-0">
 									<div className="relative h-40 w-full overflow-hidden">
 										{n.image ? (
-											<img
+											<ProgressiveImage
 												src={n.image}
 												alt={n.title}
-												className="w-full h-full object-cover"
+												wrapperClass="h-40 w-full"
 											/>
 										) : (
 											<div className="h-40 w-full bg-muted" />
@@ -394,9 +412,9 @@ export default function NoticiasPage() {
 									</div>
 								</CardContent>
 							</Card>
-						</div>
+						</motion.div>
 					))}
-				</div>
+				</motion.div>
 			)}
 		</div>
 	);

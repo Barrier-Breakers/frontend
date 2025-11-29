@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
 				protocol: "https",
 				hostname: "www.camara.leg.br",
 			},
+			{
+				protocol: "https",
+				hostname: "picsum.photos",
+			},
 		],
 		// Otimizar imagens
 		formats: ["image/avif", "image/webp"],

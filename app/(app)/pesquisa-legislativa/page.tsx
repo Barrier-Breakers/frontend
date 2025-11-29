@@ -32,7 +32,7 @@ export default function PesquisaPage() {
 				description="Explore matérias, projetos, emendas e documentos públicos da legislatura."
 			/>
 
-			<div className="mx-auto max-w-6xl p-8">
+			<div className="mx-auto max-w-6xl p-2">
 				{selectedProposicao ? (
 					<ProposicaoDetails
 						proposta={selectedProposicao}

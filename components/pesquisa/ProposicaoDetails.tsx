@@ -310,8 +310,8 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 
 	return (
 		<div className="mb-6">
-			<div className="mb-2 flex items-center gap-3 justify-between">
-				<div>
+			<div className="mb-2 flex flex-col sm:flex-row items-center gap-3 justify-between">
+				<div className="w-full">
 					<Button
 						variant="nevasca"
 						size="sm"
@@ -322,8 +322,8 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 						Voltar
 					</Button>
 				</div>
-
-				<div>
+				{/* Desktop-only player: hidden on small screens */}
+				<div className="sm:block hidden">
 					<Card className="cardoso py-2 pr-3">
 						<div className="flex items-center gap-3 px-4 py-2">
 							{loadingSimplify ? (
@@ -347,56 +347,12 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 										onValueChange={(values: number[]) => seekTo(values[0] ?? 0)}
 										aria-label="Seek"
 										className="w-44 cursor-pointer"
+										trackClassName="bg-gray-300"
+										rangeClassName=""
 									/>
 									<div className="text-sm w-20 text-right">
 										{formatTime(currentTime)} / {formatTime(duration)}
 									</div>
-
-									{/* <div className="ml-2 relative flex items-center">
-										<div className="group relative">
-											<Button
-												variant="ghost"
-												size="sm"
-												className="cursor-pointer"
-												onClick={() => {
-													if (isMuted) setIsMuted(false);
-													else setIsMuted(true);
-												}}
-												onFocus={() => {
-													setTimeout(() => {
-														const thumb = document.querySelector(
-															'#volume-slider [data-slot="slider-thumb"]'
-														) as HTMLElement | null;
-														if (thumb) thumb.focus();
-													}, 0);
-												}}
-												aria-label="Volume"
-											>
-												{isMuted || volume === 0 ? <VolumeX /> : <Volume />}
-											</Button>
-											<div className="hidden group-hover:flex group-focus-within:flex absolute -right-6 -top-38 z-50">
-												<div className="bg-popover p-2 rounded-md border shadow-md">
-													<Slider
-														id="volume-slider"
-														min={0}
-														max={1}
-														step={0.01}
-														value={[volume]}
-														onValueChange={(values: number[]) => {
-															const v = values[0] ?? 0;
-															setVolume(v);
-															if (v > 0) setIsMuted(false);
-															if (audioRef.current)
-																audioRef.current.volume = v;
-														}}
-														orientation="vertical"
-														aria-label="Volume"
-														className="h-16 w-6"
-													/>
-												</div>
-											</div>
-										</div>
-									</div> */}
 								</div>
 							) : loadingAudio ? (
 								<div className="flex items-center gap-2">
@@ -416,7 +372,6 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 								<div className="text-sm text-muted-foreground">Sem áudio</div>
 							)}
 						</div>
-						{audioUrl && <audio ref={audioRef} src={audioUrl} />}
 						{error ? (
 							<div className="px-4 py-2">
 								<div className="text-sm text-destructive">{error}</div>
@@ -437,6 +392,95 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 
 			<Card className="relative cardoso py-2">
 				<div className="relative">
+					{/* Mobile-only player placed inside main card, occupying full width */}
+					<div className="px-6 py-4 block sm:hidden">
+						<Card className="cardoso py-2">
+							<div className="flex items-center gap-3 px-4 py-2">
+								{loadingSimplify ? (
+									<div className="text-sm text-muted-foreground">
+										Carregando...
+									</div>
+								) : audioUrl ? (
+									<div className="flex items-center gap-3 w-full">
+										<Button
+											variant="bananova"
+											className="py-4! cursor-pointer"
+											size="sm"
+											onClick={togglePlay}
+										>
+											{isPlaying ? <Pause /> : <Play />}
+										</Button>
+
+										<Slider
+											min={0}
+											max={1}
+											step={0.001}
+											value={duration ? [currentTime / duration] : [0]}
+											onValueChange={(values: number[]) =>
+												seekTo(values[0] ?? 0)
+											}
+											aria-label="Seek"
+											className="w-1/2 cursor-pointer"
+											trackClassName="bg-neutral-200 dark:bg-neutral-800"
+										/>
+										<div className="text-sm w-20 text-right">
+											{formatTime(currentTime)} / {formatTime(duration)}
+										</div>
+									</div>
+								) : loadingAudio ? (
+									<div className="flex items-center gap-2">
+										<Spinner className="w-4 h-4" />
+										<div className="text-sm text-muted-foreground">
+											Preparando áudio...
+										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => cancelAudioGeneration()}
+										>
+											Cancelar
+										</Button>
+									</div>
+								) : (
+									<div className="text-sm text-muted-foreground">Sem áudio</div>
+								)}
+							</div>
+							{error ? (
+								<div className="px-4 py-2">
+									<div className="text-sm text-destructive">{error}</div>
+									<div className="mt-2">
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => setSimplifyRefreshKey((k) => k + 1)}
+										>
+											Tentar novamente
+										</Button>
+									</div>
+								</div>
+							) : null}
+						</Card>
+					</div>
+					{/* Buttons floating to the right of the card (outside) */}
+					<div className="-mt-2 sm:absolute top-2 sm:-right-26 w-full sm:w-auto">
+						<div className="sm:absolute sm:-right-6 flex px-6 sm:px-0 sm:flex-col flex-row gap-2 z-10 pointer-events-auto -right-8! w-full sm:w-auto">
+							<Button
+								variant={activeVersion === "original" ? "limanjar" : "nevasca"}
+								onClick={() => setActiveVersion("original")}
+								className="cursor-pointer w-full sm:w-auto sm:flex-none flex-1 sm:min-w-28"
+							>
+								Original
+							</Button>
+							<Button
+								variant={activeVersion === "simplificado" ? "limanjar" : "nevasca"}
+								onClick={() => simplifiedText && setActiveVersion("simplificado")}
+								disabled={!simplifiedText}
+								className="cursor-pointer w-full sm:w-auto sm:flex-none flex-1 sm:min-w-28"
+							>
+								Simplificado
+							</Button>
+						</div>
+					</div>
 					<div className="flex items-start justify-between px-6 py-4">
 						<div className="flex-1 min-w-0">
 							<ProposicaoInsights
@@ -447,29 +491,8 @@ export default function ProposicaoDetails({ proposta, onBack }: Props) {
 						</div>
 					</div>
 				</div>
-				{/* Buttons floating to the right of the card (outside) */}
-				<div className="-mt-2 absolute -right-26 w-20 top-2">
-					<div className="absolute -right-6 flex flex-col gap-2 z-10 pointer-events-auto">
-						<Button
-							variant={activeVersion === "original" ? "limanjar" : "nevasca"}
-							size="sm"
-							onClick={() => setActiveVersion("original")}
-							className="cursor-pointer"
-						>
-							Original
-						</Button>
-						<Button
-							variant={activeVersion === "simplificado" ? "limanjar" : "nevasca"}
-							size="sm"
-							onClick={() => simplifiedText && setActiveVersion("simplificado")}
-							disabled={!simplifiedText}
-							className="cursor-pointer"
-						>
-							Simplificado
-						</Button>
-					</div>
-				</div>
 			</Card>
+			{audioUrl && <audio ref={audioRef} src={audioUrl} />}
 		</div>
 	);
 }

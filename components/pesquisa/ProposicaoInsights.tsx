@@ -7,9 +7,8 @@ import { formatDate } from "@/lib/utils";
 import JsonTree from "@/components/ui/JsonTree";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "../ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Image from "next/image";
+// `Card`, `Avatar`, and `Image` are rendered within `AuthorCard` component
+import AuthorCard from "./AuthorCard";
 
 const ProposicaoInsights = ({
 	proposta,
@@ -55,17 +54,9 @@ const ProposicaoInsights = ({
 			setLoadingTemas(true);
 			try {
 				const url = `/api/proposicoes/${proposta.id}/temas`;
-				console.debug("fetching temas", url);
 				const res = await fetch(url, { signal: controller.signal });
 				if (!res.ok) {
 					if (cancelled) return;
-					let body = null;
-					try {
-						body = await res.json();
-					} catch (e) {
-						body = await res.text().catch(() => null);
-					}
-					console.warn("temas proxy returned non-ok", res.status, body);
 					setTemas([]);
 					return;
 				}
@@ -103,17 +94,9 @@ const ProposicaoInsights = ({
 			setLoadingAuthors(true);
 			try {
 				const url = `/api/proposicoes/${proposta.id}/autores`;
-				console.debug("fetching autores", url);
 				const res = await fetch(url, { signal: controller.signal });
 				if (!res.ok) {
 					if (cancelled) return;
-					let body = null;
-					try {
-						body = await res.json();
-					} catch (e) {
-						body = await res.text().catch(() => null);
-					}
-					console.warn("autores proxy returned non-ok", res.status, body);
 					setAuthors([]);
 					return;
 				}
@@ -133,7 +116,6 @@ const ProposicaoInsights = ({
 					isOrg?: boolean;
 				}[];
 
-				// We already receive the detailed data from server-side proxy
 				const detailed = items.map((it) => {
 					if (!it) return null;
 					return {
@@ -153,7 +135,6 @@ const ProposicaoInsights = ({
 
 				if (cancelled) return;
 				const filtered = detailed.filter(Boolean) as Author[];
-				// Sort by assinatura order if present
 				filtered.sort((a, b) => {
 					const aa = a.ordemAssinatura ?? 0;
 					const bb = b.ordemAssinatura ?? 0;
@@ -176,19 +157,21 @@ const ProposicaoInsights = ({
 	}, [proposta?.id]);
 
 	return (
-		<div className="">
+		<div className="w-full max-w-full">
 			<div className="space-y-6">
 				<div className="flex flex-col">
 					<span className="text-lg font-semibold">
 						{getSiglaTipoDocumento(proposta.siglaTipo || "")} {ref}
 					</span>
-					<span className="text-muted-foreground">{proposta.descricaoSituacao}</span>
-					<span className="text-muted-foreground">
+					<span className="text-muted-foreground wrap-break-word max-w-full">
+						{proposta.descricaoSituacao}
+					</span>
+					<span className="text-muted-foreground wrap-break-word max-w-full">
 						{formatDate(proposta.statusData, { includeTime: true })}
 					</span>
 				</div>
 
-				<div className="flex flex-wrap gap-2">
+				<div className="flex flex-wrap gap-2 max-w-full">
 					{loadingTemas ? (
 						<>
 							{[12, 24, 20].map((w, i) => (
@@ -202,7 +185,7 @@ const ProposicaoInsights = ({
 					) : (
 						temas.map((t) => (
 							<Badge
-								className="border-2 border-black text-md"
+								className="border-2 border-black text-md max-w-full wrap-break-word whitespace-normal"
 								key={t.codTema}
 								variant="secondary"
 							>
@@ -214,17 +197,19 @@ const ProposicaoInsights = ({
 				{activeVersion === "simplificado" ? (
 					<div className="space-y-6">
 						<h1 className="font-semibold text-lg">Texto simplificado</h1>
-						<p className="text-justify">{simplifiedText}</p>
+						<p className="text-justify wrap-break-word whitespace-normal">
+							{simplifiedText}
+						</p>
 					</div>
 				) : (
 					<>
 						<div>
 							<h1 className="font-semibold">Ementa</h1>
-							<p>{proposta.ementa}</p>
+							<p className="wrap-break-word whitespace-normal">{proposta.ementa}</p>
 						</div>
 						<div>
 							<h1 className="font-semibold">Despacho</h1>
-							<p>{proposta.despacho}</p>
+							<p className="wrap-break-word whitespace-normal">{proposta.despacho}</p>
 						</div>
 					</>
 				)}
@@ -232,7 +217,7 @@ const ProposicaoInsights = ({
 				<div>
 					<h1 className="font-semibold">Autores</h1>
 
-					<div className="mt-2 space-y-4">
+					<div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{loadingAuthors ? (
 							<div className="flex flex-col gap-4">
 								{[0, 1, 2].map((i) => (
@@ -249,102 +234,7 @@ const ProposicaoInsights = ({
 							<div className="text-muted-foreground">Sem autores informados</div>
 						) : (
 							authors.map((a, i) => (
-								<div
-									key={`${a.id ?? i}-${a.name}`}
-									className="flex gap-4 items-start"
-								>
-									<div className="flex-shrink-0">
-										<Card className="p-0 w-22 cardoso overflow-hidden!">
-											<CardContent className="p-0">
-												{a.photo ? (
-													<Image
-														width={44}
-														height={44}
-														src={a.photo}
-														alt={a.name}
-														className="w-full h-full"
-													/>
-												) : (
-													<Avatar className="size-10">
-														<AvatarFallback>
-															{a.name
-																.split(" ")
-																.map((n) => n[0])
-																.slice(0, 2)
-																.join("")}
-														</AvatarFallback>
-													</Avatar>
-												)}
-											</CardContent>
-										</Card>
-									</div>
-									<div className="flex flex-col">
-										<span className="font-semibold">{a.name}</span>
-										{!a.isOrg && (
-											<>
-												<div className="flex gap-2">
-													<span className="text-muted-foreground">
-														Partido:
-													</span>
-													<span className="font-semibold">
-														{a.party ?? "-"}
-													</span>
-												</div>
-												<div className="flex gap-2">
-													<span className="text-muted-foreground">
-														UF:
-													</span>
-													<span className="font-semibold">
-														{a.uf ?? "-"}
-													</span>
-												</div>
-												{a.email && (
-													<div className="flex gap-2">
-														<span className="text-muted-foreground">
-															Email:
-														</span>
-														<a
-															className="font-semibold"
-															href={`mailto:${a.email}`}
-														>
-															{a.email}
-														</a>
-													</div>
-												)}
-												{a.redes && a.redes.length > 0 && (
-													<div className="flex gap-2 items-center">
-														<span className="text-muted-foreground">
-															Redes sociais:
-														</span>
-														<div className="flex gap-2">
-															{a.redes.map((r, idx) => {
-																let host = r;
-																try {
-																	host = new URL(
-																		r
-																	).hostname.replace("www.", "");
-																} catch (e) {
-																	// ignore
-																}
-																return (
-																	<a
-																		key={idx}
-																		href={r}
-																		target="_blank"
-																		rel="noreferrer"
-																		className="text-blue-600 underline"
-																	>
-																		{host}
-																	</a>
-																);
-															})}
-														</div>
-													</div>
-												)}
-											</>
-										)}
-									</div>
-								</div>
+								<AuthorCard key={`${a.id ?? i}-${a.name}`} author={a} />
 							))
 						)}
 					</div>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import InputFloat from "./input-label";
+import { Spinner } from "./spinner";
 import { cn } from "@/lib/utils";
 import { searchService, type Suggestion } from "@/services/search.service";
 
@@ -16,6 +17,7 @@ type Props = {
 	onSelect?: (v: Suggestion) => void;
 	suppressNextFetch?: boolean;
 	onSuppressConsumed?: () => void;
+	autoFocus?: boolean;
 };
 
 export default function InputFloatSuggest({
@@ -25,6 +27,7 @@ export default function InputFloatSuggest({
 	minChars = 3,
 	debounceMs = 300,
 	value: valueProp,
+	autoFocus,
 	onChange,
 	onSelect,
 	suppressNextFetch,
@@ -55,10 +58,15 @@ export default function InputFloatSuggest({
 	}, [suppressNextFetch, onSuppressConsumed]);
 
 	useEffect(() => {
-		if (debounceRef.current) window.clearTimeout(debounceRef.current);
+		if (debounceRef.current) {
+			window.clearTimeout(debounceRef.current);
+			// Hide spinner when debounce restarts (user typed again)
+			setLoading(false);
+		}
 		if (value.length < minChars) {
 			setSuggestions([]);
 			setOpen(false);
+			setLoading(false);
 			return;
 		}
 
@@ -91,6 +99,8 @@ export default function InputFloatSuggest({
 		}, debounceMs);
 		return () => {
 			if (debounceRef.current) window.clearTimeout(debounceRef.current);
+			// Ensure loading hides if effect is cleaned up before a fetch occurs
+			setLoading(false);
 		};
 	}, [value, minChars, debounceMs]);
 
@@ -161,7 +171,16 @@ export default function InputFloatSuggest({
 				value={value}
 				onChange={handleChange}
 				onKeyDown={handleKeyDown as any}
+				autoFocus
+				inputClassName="pr-12"
 			/>
+
+			{/* Inline spinner inside the input, aligned to the right */}
+			{loading && (
+				<div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+					<Spinner className="h-5 w-5 text-muted-foreground" />
+				</div>
+			)}
 
 			{open && (
 				<div className="absolute z-50 top-full mt-2 w-full rounded-md border bg-popover p-2 shadow-md cardoso">

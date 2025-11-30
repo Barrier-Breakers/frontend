@@ -60,7 +60,7 @@ export const navItems: NavItem[] = [
 		label: "Links Úteis",
 		lottieAnimation: animations.link,
 		animateOnHover: true,
-		animationClassName: "h-! -translate-y-[2px] scale-95!",
+		animationClassName: "",
 		href: "/links-uteis",
 		activeVariant: "limanjar",
 	},

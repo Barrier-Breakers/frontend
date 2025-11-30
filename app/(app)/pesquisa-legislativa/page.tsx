@@ -43,6 +43,37 @@ export default function PesquisaPage() {
 					/>
 				) : (
 					<>
+						{/* Topics (simple div, buttons instead of badges) */}
+						<div className="mb-6">
+							<div className="flex items-start justify-between">
+								<div>
+									<h3 className="text-xl font-semibold">
+										Tópicos que podem te interessar
+									</h3>
+									<div className="text-sm text-muted-foreground">
+										Selecione um tópico para começar
+									</div>
+								</div>
+							</div>
+
+							<div className="mt-4 flex flex-wrap gap-2">
+								{suggestedTopics.map((topic) => (
+									<Button
+										key={topic}
+										variant="nevasca"
+										className="text-sm cursor-pointer"
+										size="sm"
+										onClick={() => {
+											// Only set the topic as current search value to trigger suggestions.
+											setSearchValue(topic);
+										}}
+									>
+										{topic}
+									</Button>
+								))}
+							</div>
+						</div>
+
 						<div className="flex justify-center mb-8">
 							<div className="w-full">
 								<div className="relative">
@@ -74,6 +105,7 @@ export default function PesquisaPage() {
 										placeholder="Pesquisar projetos, leis, palavras-chave..."
 										value={searchValue}
 										onChange={(v) => setSearchValue(v)}
+										autoFocus
 										onSelect={(s) => {
 											const label = s?.siglaTipo
 												? `${s.siglaTipo} ${s.numero}/${s.ano} — ${s.ementa}`
@@ -165,39 +197,6 @@ export default function PesquisaPage() {
 										</div>
 									);
 								})}
-							</div>
-						</div>
-
-						{/* (Details are rendered above replacing the search UI when selected) */}
-
-						{/* Topics (simple div, buttons instead of badges) */}
-						<div className="mb-6">
-							<div className="flex items-start justify-between">
-								<div>
-									<h3 className="text-xl font-semibold">
-										Tópicos que podem te interessar
-									</h3>
-									<div className="text-sm text-muted-foreground">
-										Selecione um tópico para começar
-									</div>
-								</div>
-							</div>
-
-							<div className="mt-4 flex flex-wrap gap-2">
-								{suggestedTopics.map((topic) => (
-									<Button
-										key={topic}
-										variant="nevasca"
-										className="text-sm cursor-pointer"
-										size="sm"
-										onClick={() => {
-											// Only set the topic as current search value to trigger suggestions.
-											setSearchValue(topic);
-										}}
-									>
-										{topic}
-									</Button>
-								))}
 							</div>
 						</div>
 					</>

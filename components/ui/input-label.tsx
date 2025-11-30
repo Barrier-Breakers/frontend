@@ -9,6 +9,7 @@ const InputFloat = ({
 	label,
 	placeholder,
 	className,
+	inputClassName,
 	type,
 	name,
 	required,
@@ -23,6 +24,7 @@ const InputFloat = ({
 	label?: string;
 	placeholder?: string;
 	className?: string;
+	inputClassName?: string;
 	type?: string;
 	name?: string;
 	required?: boolean;
@@ -80,7 +82,7 @@ const InputFloat = ({
 						onBlur?.(e);
 					}}
 					autoFocus={autoFocus}
-					className={`dark:bg-background w-full sombroso nevasca font-semibold h-12 font-lg transition-shadow focus:outline-none focus:ring-2 ${ariaInvalid ? "border-2 border-red-600 focus:ring-red-400" : "border-2 border-black focus:ring-black"}`}
+					className={`dark:bg-background w-full sombroso nevasca font-semibold h-12 font-lg transition-shadow focus:outline-none focus:ring-2 ${ariaInvalid ? "border-2 border-red-600 focus:ring-red-400" : "border-2 border-black focus:ring-black"} ${inputClassName ?? ""}`}
 					autoComplete="off"
 				/>
 			</div>

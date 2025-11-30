@@ -188,94 +188,109 @@
 	transform: scale(1.15);
 }
 
-button {
+button,
+[data-slot="button"] {
 	transition: 0.2s all;
 	border-radius: 10px !important;
 }
 
-button:hover {
+button:hover,
+[data-slot="button"]:hover {
 	transform: translate(-2px, -2px);
 }
 
+[data-slot="button"]:active,
 button:active {
 	transform: translate(-1px, -1px);
 }
 
-button:focus-visible {
+button:focus-visible,
+[data-slot="button"]:focus-visible {
 	outline: none;
 	transform: translate(-2px, -2px);
 }
 
-button:focus-visible:active {
+button:focus-visible:active,
+[data-slot="button"]:focus-visible:active {
 	box-shadow: 3px 3px 0 0px black;
 	transform: translate(-1px, -1px);
 }
 
 /* Focus ring colors for each button variant - inner white, outer colored */
-button[class*="bg-white"]:focus-visible {
+button[class*="bg-white"]:focus-visible,
+[data-slot="button"][class*="bg-white"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px black !important;
 }
 
-button[class*="bg-\[#abfa00\]"]:focus-visible {
+button[class*="bg-\[#abfa00\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#abfa00\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #abfa00 !important;
 }
 
-button[class*="bg-\[#e8752e\]"]:focus-visible {
+button[class*="bg-\[#e8752e\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#e8752e\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #e8752e !important;
 }
 
-button[class*="bg-\[#e594af\]"]:focus-visible {
+button[class*="bg-\[#e594af\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#e594af\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #e594af !important;
 }
 
-button[class*="bg-\[#478e4e\]"]:focus-visible {
+button[class*="bg-\[#478e4e\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#478e4e\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #478e4e !important;
 }
 
-button[class*="bg-\[#f9df59\]"]:focus-visible {
+button[class*="bg-\[#f9df59\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#f9df59\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #f9df59 !important;
 }
 
-button[class*="bg-\[#444b88\]"]:focus-visible {
+button[class*="bg-\[#444b88\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#444b88\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #444b88 !important;
 }
 
-button[class*="bg-\[#da3263\]"]:focus-visible {
+button[class*="bg-\[#da3263\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#da3263\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #da3263 !important;
 }
 
-button[class*="bg-\[#b9d3c2\]"]:focus-visible {
+button[class*="bg-\[#b9d3c2\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#b9d3c2\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
 		0 0 0 8px #b9d3c2 !important;
 }
 
-button[class*="bg-\[#0499a2\]"]:focus-visible {
+button[class*="bg-\[#0499a2\]"]:focus-visible,
+[data-slot="button"][class*="bg-\[#0499a2\]"]:focus-visible {
 	box-shadow:
 		4px 4px 0 0px black,
 		0 0 0 4px white,
@@ -315,7 +330,8 @@ button[class*="bg-\[#e594af\]"]:focus-visible:active {
 	transform: translate(-1px, -1px);
 }
 
-button[class*="bg-\[#478e4e\]"]:focus-visible:active {
+button[class*="bg-\[#478e4e\]"]:focus-visible:active,
+[data-slot="button"][class*="bg-\[#478e4e\]"]:focus-visible:active {
 	box-shadow:
 		3px 3px 0 0px black,
 		0 0 0 4px white,
@@ -323,7 +339,8 @@ button[class*="bg-\[#478e4e\]"]:focus-visible:active {
 	transform: translate(-1px, -1px);
 }
 
-button[class*="bg-\[#f9df59\]"]:focus-visible:active {
+button[class*="bg-\[#f9df59\]"]:focus-visible:active,
+[data-slot="button"][class*="bg-\[#f9df59\]"]:focus-visible:active {
 	box-shadow:
 		3px 3px 0 0px black,
 		0 0 0 4px white,
@@ -331,7 +348,8 @@ button[class*="bg-\[#f9df59\]"]:focus-visible:active {
 	transform: translate(-1px, -1px);
 }
 
-button[class*="bg-\[#444b88\]"]:focus-visible:active {
+button[class*="bg-\[#444b88\]"]:focus-visible:active,
+[data-slot="button"][class*="bg-\[#444b88\]"]:focus-visible:active {
 	box-shadow:
 		3px 3px 0 0px black,
 		0 0 0 4px white,
@@ -339,7 +357,8 @@ button[class*="bg-\[#444b88\]"]:focus-visible:active {
 	transform: translate(-1px, -1px);
 }
 
-button[class*="bg-\[#da3263\]"]:focus-visible:active {
+button[class*="bg-\[#da3263\]"]:focus-visible:active,
+[data-slot="button"][class*="bg-\[#da3263\]"]:focus-visible:active {
 	box-shadow:
 		3px 3px 0 0px black,
 		0 0 0 4px white,
@@ -347,7 +366,8 @@ button[class*="bg-\[#da3263\]"]:focus-visible:active {
 	transform: translate(-1px, -1px);
 }
 
-button[class*="bg-\[#b9d3c2\]"]:focus-visible:active {
+button[class*="bg-\[#b9d3c2\]"]:focus-visible:active,
+[data-slot="button"][class*="bg-\[#b9d3c2\]"]:focus-visible:active {
 	box-shadow:
 		3px 3px 0 0px black,
 		0 0 0 4px white,
@@ -355,7 +375,8 @@ button[class*="bg-\[#b9d3c2\]"]:focus-visible:active {
 	transform: translate(-1px, -1px);
 }
 
-button[class*="bg-\[#0499a2\]"]:focus-visible:active {
+button[class*="bg-\[#0499a2\]"]:focus-visible:active,
+[data-slot="button"][class*="bg-\[#0499a2\]"]:focus-visible:active {
 	box-shadow:
 		3px 3px 0 0px black,
 		0 0 0 4px white,

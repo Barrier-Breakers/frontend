@@ -70,7 +70,7 @@ type Author = {
 
 export default function AuthorCard({ author, className }: { author: Author; className?: string }) {
 	return (
-		<div className={`cardoso p-2 rounded-xl flex flex-col gap-2 ${className || ""}`}>
+		<div className={`cardoso p-2 bg-muted rounded-xl flex flex-col gap-2 ${className || ""}`}>
 			<div className="flex gap-4 items-start min-w-0 w-full">
 				<div className="shrink-0">
 					<Card className="p-0 w-22 border-2 border-black rounded-md overflow-hidden">
@@ -98,7 +98,7 @@ export default function AuthorCard({ author, className }: { author: Author; clas
 					</Card>
 				</div>
 				<div className="flex-1 h-full flex flex-col justify-between min-w-0 items-center">
-					<span className="font-semibold text-lg truncate line-clamp-1">
+					<span className="font-semibold text-center w-full truncate line-clamp-1">
 						{author.name}
 					</span>
 					{!author.isOrg && (
@@ -162,7 +162,7 @@ export default function AuthorCard({ author, className }: { author: Author; clas
 											key={idx}
 											variant="nevasca"
 											size="sm"
-											className="p-1.5"
+											className=""
 											aria-label={`Abrir no ${aria}`}
 										>
 											<a href={r} target="_blank" rel="noreferrer">
